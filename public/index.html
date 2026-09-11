@@ -173,9 +173,14 @@
       🎲 Rastgele Örnek (8 Kırmızı, 8 Mavi, 4 Gri) Doldur
     </button>
 
+    <!-- RASTGELE SPORCU MODU BUTONU -->
+    <button class="btn btn-start" onclick="submitRandomGame()" style="margin-bottom: 15px; background-color: #e67e22; display: block; width: 100%;">
+      🏆 Rastgele Sporcu Oyunu Başlat (Otomatik)
+    </button>
+
     <div class="setup-grid" id="setupGrid"></div>
 
-    <button class="btn btn-start" onclick="submitCustomGame()">Oyunu Başlat 🚀</button>
+    <button class="btn btn-start" onclick="submitCustomGame()">Özel Oyunu Başlat 🚀</button>
   </div>
 
   <!-- CANLI OYUN EKRANI -->
@@ -231,12 +236,20 @@
     // 8 Kırmızı, 8 Mavi, 4 Nötral Rastgele Şablon Doldur
     function fillRandomTemplate() {
       const ornekKelimeler = [
-        "ELMA", "GÜNEŞ", "DENİZ", "KİTAP", "ARABA", "KAPLAN", "UÇAK", "KÖPRÜ",
-        "ROBOT", "MÜZİK", "YILDIZ", "FUTBOL", "AĞAÇ", "KAHVE", "UZAY", "TREN",
-        "PİZZA", "RÜZGAR", "GÖZLÜK", "SİNEMA"
+        "Messi", "Ronaldo", "Neymar", "Mbappe", "Haaland", "Maradona", "Pele", 
+  "Zidane", "Ronaldinho", "Cruyff", "Lewandowski", "Salah", "De Bruyne", 
+  "Modric", "Benzema", "Icardi", "Dzeko", "Tadic", "Aboubakar", "Muslera", 
+  "Arda Güler", "Hakan Çalhanoğlu", "Kerem Aktürkoğlu", "Semih Kılıçsoy", "Barış Alper Yılmaz",
+  "Buffon", "Neuer", "Sergio Ramos", "Beckham", "Henry", "Eto'o", "Drogba","Michael Jordan", "LeBron James", "Kobe Bryant", "Steph Curry", "Shaquille O'Neal", 
+  "Cedi Osman", "Alperen Şengün", "Ömer Faruk Yurtseven", "Furkan Korkmaz", "Shane Larkin",
+  "Giannis Antetokounmpo", "Luka Doncic", "Nikola Jokic", "Kevin Durant", "Wembanyama", 
+  "Magic Johnson", "Larry Bird", "Dennis Rodman", "Kyrie Irving", "James Harden","Roger Federer", "Rafael Nadal", "Novak Djokovic", "Carlos Alcaraz", "Jannik Sinner", 
+  "Serena Williams", "Iga Swiatek", "Aryna Sabalenka", "Maria Sharapova", "Andy Murray", 
+  "Stefanos Tsitsipas", "Daniil Medvedev", "Coco Gauff", "Venus Williams", "Marsel İlhan","Lewis Hamilton", "Max Verstappen", "Michael Schumacher", "Ayrton Senna", "Charles Leclerc", 
+  "Lando Norris", "Fernando Alonso", "Sebastian Vettel", "Carlos Sainz", "Oscar Piastri", 
+  "George Russell", "Kimi Raikkonen", "Daniel Ricciardo", "Sergio Perez", "Niki Lauda"
       ];
       
-      // Tam olarak 8 Kırmızı, 8 Mavi, 4 Nötral
       let tipler = [
         ...Array(8).fill('red'), 
         ...Array(8).fill('blue'), 
@@ -272,6 +285,11 @@
       socket.emit('setupCustomGame', customBoard);
     }
 
+    // RASTGELE SPORCU OYUNUNU BAŞLATAN FONKSİYON
+    function submitRandomGame() {
+      socket.emit('setupRandomGame');
+    }
+
     function toggleSpymaster() {
       isSpymaster = !isSpymaster;
       if (isSpymaster) {
@@ -291,7 +309,7 @@
     }
 
     function resetToSetup() {
-      if (confirm("Kurulum ekranına dönmek istediğinize emin misiniz? Mese sıfırlanacak.")) {
+      if (confirm("Kurulum ekranına dönmek istediğinize emin misiniz? Masa sıfırlanacak.")) {
         socket.emit('resetToSetup');
       }
     }
