@@ -173,11 +173,6 @@
       🎲 Rastgele Örnek (8 Kırmızı, 8 Mavi, 4 Gri) Doldur
     </button>
 
-    <!-- RASTGELE SPORCU MODU BUTONU -->
-    <button class="btn btn-start" onclick="submitRandomGame()" style="margin-bottom: 15px; background-color: #e67e22; display: block; width: 100%;">
-      🏆 Rastgele Sporcu Oyunu Başlat (Otomatik)
-    </button>
-
     <div class="setup-grid" id="setupGrid"></div>
 
     <button class="btn btn-start" onclick="submitCustomGame()">Özel Oyunu Başlat 🚀</button>
@@ -237,28 +232,33 @@
     function fillRandomTemplate() {
       const ornekKelimeler = [
         "Messi", "Ronaldo", "Neymar", "Mbappe", "Haaland", "Maradona", "Pele", 
-  "Zidane", "Ronaldinho", "Cruyff", "Lewandowski", "Salah", "De Bruyne", 
-  "Modric", "Benzema", "Icardi", "Dzeko", "Tadic", "Aboubakar", "Muslera", 
-  "Arda Güler", "Hakan Çalhanoğlu", "Kerem Aktürkoğlu", "Semih Kılıçsoy", "Barış Alper Yılmaz",
-  "Buffon", "Neuer", "Sergio Ramos", "Beckham", "Henry", "Eto'o", "Drogba","Michael Jordan", "LeBron James", "Kobe Bryant", "Steph Curry", "Shaquille O'Neal", 
-  "Cedi Osman", "Alperen Şengün", "Ömer Faruk Yurtseven", "Furkan Korkmaz", "Shane Larkin",
-  "Giannis Antetokounmpo", "Luka Doncic", "Nikola Jokic", "Kevin Durant", "Wembanyama", 
-  "Magic Johnson", "Larry Bird", "Dennis Rodman", "Kyrie Irving", "James Harden","Roger Federer", "Rafael Nadal", "Novak Djokovic", "Carlos Alcaraz", "Jannik Sinner", 
-  "Serena Williams", "Iga Swiatek", "Aryna Sabalenka", "Maria Sharapova", "Andy Murray", 
-  "Stefanos Tsitsipas", "Daniil Medvedev", "Coco Gauff", "Venus Williams", "Marsel İlhan","Lewis Hamilton", "Max Verstappen", "Michael Schumacher", "Ayrton Senna", "Charles Leclerc", 
-  "Lando Norris", "Fernando Alonso", "Sebastian Vettel", "Carlos Sainz", "Oscar Piastri", 
-  "George Russell", "Kimi Raikkonen", "Daniel Ricciardo", "Sergio Perez", "Niki Lauda"
+        "Zidane", "Ronaldinho", "Cruyff", "Lewandowski", "Salah", "De Bruyne", 
+        "Modric", "Benzema", "Icardi", "Dzeko", "Tadic", "Aboubakar", "Muslera", 
+        "Arda Güler", "Hakan Çalhanoğlu", "Kerem Aktürkoğlu", "Semih Kılıçsoy", "Barış Alper Yılmaz",
+        "Buffon", "Neuer", "Sergio Ramos", "Beckham", "Henry", "Eto'o", "Drogba", "Michael Jordan", 
+        "LeBron James", "Kobe Bryant", "Steph Curry", "Shaquille O'Neal", "Cedi Osman", "Alperen Şengün", 
+        "Ömer Faruk Yurtseven", "Furkan Korkmaz", "Shane Larkin", "Giannis Antetokounmpo", "Luka Doncic", 
+        "Nikola Jokic", "Kevin Durant", "Wembanyama", "Magic Johnson", "Larry Bird", "Dennis Rodman", 
+        "Kyrie Irving", "James Harden", "Roger Federer", "Rafael Nadal", "Novak Djokovic", "Carlos Alcaraz", 
+        "Jannik Sinner", "Serena Williams", "Iga Swiatek", "Aryna Sabalenka", "Maria Sharapova", "Andy Murray", 
+        "Stefanos Tsitsipas", "Daniil Medvedev", "Coco Gauff", "Venus Williams", "Marsel İlhan", "Lewis Hamilton", 
+        "Max Verstappen", "Michael Schumacher", "Ayrton Senna", "Charles Leclerc", "Lando Norris", "Fernando Alonso", 
+        "Sebastian Vettel", "Carlos Sainz", "Oscar Piastri", "George Russell", "Kimi Raikkonen", "Daniel Ricciardo", 
+        "Sergio Perez", "Niki Lauda"
       ];
       
+      // Kelimeleri Karıştır
+      const karisikKelimeler = [...ornekKelimeler].sort(() => 0.5 - Math.random());
+
+      // Tipleri Karıştır
       let tipler = [
         ...Array(8).fill('red'), 
         ...Array(8).fill('blue'), 
         ...Array(4).fill('neutral')
-      ];
-      tipler.sort(() => 0.5 - Math.random());
+      ].sort(() => 0.5 - Math.random());
 
       for (let i = 0; i < 20; i++) {
-        document.getElementById(`word-${i}`).value = ornekKelimeler[i];
+        document.getElementById(`word-${i}`).value = karisikKelimeler[i];
         document.getElementById(`type-${i}`).value = tipler[i];
       }
     }
@@ -266,8 +266,13 @@
     function submitCustomGame() {
       let customBoard = [];
       for (let i = 0; i < 20; i++) {
-        const word = document.getElementById(`word-${i}`).value.trim().toUpperCase();
-        const type = document.getElementById(`type-${i}`).value;
+        const wordInput = document.getElementById(`word-${i}`);
+        const typeSelect = document.getElementById(`type-${i}`);
+        
+        if (!wordInput || !typeSelect) return;
+
+        const word = wordInput.value.trim().toUpperCase();
+        const type = typeSelect.value;
 
         if (!word) {
           alert(`Lütfen ${i + 1}. kelimeyi boş bırakmayın!`);
@@ -283,11 +288,6 @@
       }
 
       socket.emit('setupCustomGame', customBoard);
-    }
-
-    // RASTGELE SPORCU OYUNUNU BAŞLATAN FONKSİYON
-    function submitRandomGame() {
-      socket.emit('setupRandomGame');
     }
 
     function toggleSpymaster() {
@@ -320,6 +320,10 @@
       if (!state.isSetup) {
         setupScreen.classList.remove('hidden');
         gameScreen.classList.add('hidden');
+        // Ekran gösterildiğinde girdilerin varlığından emin ol
+        if (setupGrid.children.length === 0) {
+          createSetupInputs();
+        }
       } else {
         setupScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
@@ -359,13 +363,16 @@
         }
 
         cardElement.onclick = () => {
-          socket.emit('clickCard', card.id);
+          if (!card.revealed) {
+            socket.emit('clickCard', card.id);
+          }
         };
 
         boardDiv.appendChild(cardElement);
       });
     }
 
+    // Sayfa açılır açılmaz girdileri oluştur
     createSetupInputs();
   </script>
 </body>
