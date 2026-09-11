@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Malumnames.io</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a2e;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .setup-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #16213e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .setup-item {
+      background: #0f3460;
+      padding: 8px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .setup-item input[type="text"] {
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .setup-item select {
+      padding: 5px;
+      border-radius: 4px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .select-red { background-color: #e74c3c; color: white; }
+    .select-blue { background-color: #3498db; color: white; }
+    .select-neutral { background-color: #95a5a6; color: white; }
+
+    .score-board {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .score-card {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      min-width: 130px;
+    }
+
+    .score-card.red-score { background-color: #e74c3c; }
+    .score-card.blue-score { background-color: #3498db; }
+
+    .turn-indicator {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .turn-red { background-color: #e74c3c; }
+    .turn-blue { background-color: #3498db; }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn:hover { transform: scale(1.05); }
+    .btn-start { background-color: #27ae60; color: white; font-size: 18px; padding: 12px 30px; }
+    .btn-spymaster { background-color: #f39c12; color: white; }
+    .btn-end-turn { background-color: #8e44ad; color: white; }
+    .btn-reset { background-color: #7f8c8d; color: white; }
+
+    /* 5 Sütun x 4 Satır Oyun Masası */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .card {
+      background-color: #e2e2e2;
+      color: #333;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    .card:hover { transform: scale(1.03); }
+
+    .card.revealed.red { background-color: #e74c3c; color: white; }
+    .card.revealed.blue { background-color: #3498db; color: white; }
+    .card.revealed.neutral { background-color: #95a5a6; color: white; }
+
+    .spymaster-mode .card:not(.revealed).red {
+      border: 4px solid #e74c3c;
+      background-color: #fadbd8;
+    }
+
+    .spymaster-mode .card:not(.revealed).blue {
+      border: 4px solid #3498db;
+      background-color: #d6eaf8;
+    }
+
+    .spymaster-mode .card:not(.revealed).neutral {
+      border: 4px solid #7f8c8d;
+      background-color: #eaeded;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <h1>MALUMNAMES</h1>
+
+  <!-- KURULUM EKRANI -->
+  <div id="setupScreen" class="setup-container">
+    <h2>Oyun Kurulumu (20 Kart)</h2>
+    <p>20 Kelimeyi girin ve gruplarını (8 Kırmızı, 8 Mavi, 4 Sivil) belirleyin:</p>
+    
+    <button class="btn btn-spymaster" onclick="fillRandomTemplate()" style="margin-bottom: 15px;">
+      🎲 Rastgele Örnek (8 Kırmızı, 8 Mavi, 4 Gri) Doldur
+    </button>
+
+    <div class="setup-grid" id="setupGrid"></div>
+
+    <button class="btn btn-start" onclick="submitCustomGame()">Oyunu Başlat 🚀</button>
+  </div>
+
+  <!-- CANLI OYUN EKRANI -->
+  <div id="gameScreen" class="hidden">
+    <div class="score-board">
+      <div class="score-card red-score">Kırmızı: <span id="redCount">8</span></div>
+      <div class="turn-indicator turn-red" id="turnIndicator">Sıra: KIRMIZI</div>
+      <div class="score-card blue-score">Mavi: <span id="blueCount">8</span></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-spymaster" id="spymasterBtn" onclick="toggleSpymaster()">Spymaster Modu: KAPALI</button>
+      <button class="btn btn-end-turn" onclick="endTurn()">Turu Bitir ⌛</button>
+      <button class="btn btn-reset" onclick="resetToSetup()">Yeni Oyun Kur ⚙️</button>
+    </div>
+
+    <div class="board" id="board"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const setupScreen = document.getElementById('setupScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const setupGrid = document.getElementById('setupGrid');
+    const boardDiv = document.getElementById('board');
+    const spymasterBtn = document.getElementById('spymasterBtn');
+    const redCountSpan = document.getElementById('redCount');
+    const blueCountSpan = document.getElementById('blueCount');
+    const turnIndicator = document.getElementById('turnIndicator');
+
+    let isSpymaster = false;
+    let currentGameState = { board: [], currentTurn: 'red' };
+
+    // 20 Tane Giriş Kutusu Oluştur
+    function createSetupInputs() {
+      setupGrid.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const item = document.createElement('div');
+        item.className = 'setup-item';
+        item.innerHTML = `
+          <input type="text" id="word-${i}" placeholder="Kelime ${i + 1}" required />
+          <select id="type-${i}">
+            <option value="red" class="select-red">Kırmızı</option>
+            <option value="blue" class="select-blue">Mavi</option>
+            <option value="neutral" class="select-neutral">Sivil (Gri)</option>
+          </select>
+        `;
+        setupGrid.appendChild(item);
+      }
+    }
+
+    // 8 Kırmızı, 8 Mavi, 4 Nötral Rastgele Şablon Doldur
+    function fillRandomTemplate() {
+      const ornekKelimeler = [
+        "ELMA", "GÜNEŞ", "DENİZ", "KİTAP", "ARABA", "KAPLAN", "UÇAK", "KÖPRÜ",
+        "ROBOT", "MÜZİK", "YILDIZ", "FUTBOL", "AĞAÇ", "KAHVE", "UZAY", "TREN",
+        "PİZZA", "RÜZGAR", "GÖZLÜK", "SİNEMA"
+      ];
+      
+      // Tam olarak 8 Kırmızı, 8 Mavi, 4 Nötral
+      let tipler = [
+        ...Array(8).fill('red'), 
+        ...Array(8).fill('blue'), 
+        ...Array(4).fill('neutral')
+      ];
+      tipler.sort(() => 0.5 - Math.random());
+
+      for (let i = 0; i < 20; i++) {
+        document.getElementById(`word-${i}`).value = ornekKelimeler[i];
+        document.getElementById(`type-${i}`).value = tipler[i];
+      }
+    }
+
+    function submitCustomGame() {
+      let customBoard = [];
+      for (let i = 0; i < 20; i++) {
+        const word = document.getElementById(`word-${i}`).value.trim().toUpperCase();
+        const type = document.getElementById(`type-${i}`).value;
+
+        if (!word) {
+          alert(`Lütfen ${i + 1}. kelimeyi boş bırakmayın!`);
+          return;
+        }
+
+        customBoard.push({
+          id: i,
+          word: word,
+          type: type,
+          revealed: false
+        });
+      }
+
+      socket.emit('setupCustomGame', customBoard);
+    }
+
+    function toggleSpymaster() {
+      isSpymaster = !isSpymaster;
+      if (isSpymaster) {
+        spymasterBtn.innerText = "Spymaster Modu: AÇIK";
+        spymasterBtn.style.backgroundColor = "#27ae60";
+        boardDiv.classList.add('spymaster-mode');
+      } else {
+        spymasterBtn.innerText = "Spymaster Modu: KAPALI";
+        spymasterBtn.style.backgroundColor = "#f39c12";
+        boardDiv.classList.remove('spymaster-mode');
+      }
+      renderBoard();
+    }
+
+    function endTurn() {
+      socket.emit('endTurn');
+    }
+
+    function resetToSetup() {
+      if (confirm("Kurulum ekranına dönmek istediğinize emin misiniz? Mese sıfırlanacak.")) {
+        socket.emit('resetToSetup');
+      }
+    }
+
+    socket.on('gameUpdate', (state) => {
+      currentGameState = state;
+
+      if (!state.isSetup) {
+        setupScreen.classList.remove('hidden');
+        gameScreen.classList.add('hidden');
+      } else {
+        setupScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        renderBoard();
+        updateHeaderInfo();
+      }
+    });
+
+    function updateHeaderInfo() {
+      const remainingRed = currentGameState.board.filter(c => c.type === 'red' && !c.revealed).length;
+      const remainingBlue = currentGameState.board.filter(c => c.type === 'blue' && !c.revealed).length;
+      
+      redCountSpan.innerText = remainingRed;
+      blueCountSpan.innerText = remainingBlue;
+
+      if (currentGameState.currentTurn === 'red') {
+        turnIndicator.innerText = "Sıra: KIRMIZI";
+        turnIndicator.className = "turn-indicator turn-red";
+      } else {
+        turnIndicator.innerText = "Sıra: MAVİ";
+        turnIndicator.className = "turn-indicator turn-blue";
+      }
+    }
+
+    function renderBoard() {
+      boardDiv.innerHTML = '';
+
+      currentGameState.board.forEach((card) => {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card';
+        cardElement.innerText = card.word;
+
+        cardElement.classList.add(card.type);
+
+        if (card.revealed) {
+          cardElement.classList.add('revealed');
+        }
+
+        cardElement.onclick = () => {
+          socket.emit('clickCard', card.id);
+        };
+
+        boardDiv.appendChild(cardElement);
+      });
+    }
+
+    createSetupInputs();
+  </script>
+</body>
+</html>
