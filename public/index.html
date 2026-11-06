@@ -2,378 +2,161 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Malumnames.io</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #1a1a2e;
-      color: white;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .setup-container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #16213e;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-
-    .setup-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .setup-item {
-      background: #0f3460;
-      padding: 8px;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .setup-item input[type="text"] {
-      padding: 6px;
-      border: none;
-      border-radius: 4px;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .setup-item select {
-      padding: 5px;
-      border-radius: 4px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .select-red { background-color: #e74c3c; color: white; }
-    .select-blue { background-color: #3498db; color: white; }
-    .select-neutral { background-color: #95a5a6; color: white; }
-
-    .score-board {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .score-card {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      min-width: 130px;
-    }
-
-    .score-card.red-score { background-color: #e74c3c; }
-    .score-card.blue-score { background-color: #3498db; }
-
-    .turn-indicator {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .turn-red { background-color: #e74c3c; }
-    .turn-blue { background-color: #3498db; }
-
-    .controls {
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    .btn {
-      border: none;
-      padding: 10px 20px;
-      font-size: 15px;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .btn:hover { transform: scale(1.05); }
-    .btn-start { background-color: #27ae60; color: white; font-size: 18px; padding: 12px 30px; }
-    .btn-spymaster { background-color: #f39c12; color: white; }
-    .btn-end-turn { background-color: #8e44ad; color: white; }
-    .btn-reset { background-color: #7f8c8d; color: white; }
-
-    /* 5 Sütun x 4 Satır Oyun Masası */
-    .board {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      max-width: 800px;
-      margin: 20px auto;
-    }
-
-    .card {
-      background-color: #e2e2e2;
-      color: #333;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      transition: all 0.2s;
-    }
-
-    .card:hover { transform: scale(1.03); }
-
-    .card.revealed.red { background-color: #e74c3c; color: white; }
-    .card.revealed.blue { background-color: #3498db; color: white; }
-    .card.revealed.neutral { background-color: #95a5a6; color: white; }
-
-    .spymaster-mode .card:not(.revealed).red {
-      border: 4px solid #e74c3c;
-      background-color: #fadbd8;
-    }
-
-    .spymaster-mode .card:not(.revealed).blue {
-      border: 4px solid #3498db;
-      background-color: #d6eaf8;
-    }
-
-    .spymaster-mode .card:not(.revealed).neutral {
-      border: 4px solid #7f8c8d;
-      background-color: #eaeded;
-    }
-
-    .hidden { display: none !important; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malum Mecra — Yayın Oyunu</title>
+  <meta name="description" content="Malum Mecra: yayın için spor temalı isim tahmin oyunu. 20 isim, 8 mor, 8 sarı, 4 sivil.">
+  <meta name="theme-color" content="#150e1f">
+  <meta property="og:title" content="Malum Mecra — Yayın Oyunu">
+  <meta property="og:description" content="Sporun efsaneleriyle oynanan takım oyunu.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/logo-tile.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <div class="bg-glow" aria-hidden="true"></div>
 
-  <h1>MALUMNAMES</h1>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Malum Mecra ana sayfa">
+      <img class="brand-mark" src="/logo-tile.png" alt="Malum Mecra logosu" width="52" height="52">
+      <span class="brand-text">
+        <strong>MALUM MECRA</strong>
+        <small>YAYIN OYUNU</small>
+      </span>
+    </a>
 
-  <!-- KURULUM EKRANI -->
-  <div id="setupScreen" class="setup-container">
-    <h2>Oyun Kurulumu (20 Kart)</h2>
-    <p>20 Kelimeyi girin ve gruplarını (8 Kırmızı, 8 Mavi, 4 Sivil) belirleyin:</p>
-    
-    <button class="btn btn-spymaster" onclick="fillRandomTemplate()" style="margin-bottom: 15px;">
-      🎲 Rastgele Örnek (8 Kırmızı, 8 Mavi, 4 Gri) Doldur
-    </button>
-
-    <div class="setup-grid" id="setupGrid"></div>
-
-    <button class="btn btn-start" onclick="submitCustomGame()">Özel Oyunu Başlat 🚀</button>
-  </div>
-
-  <!-- CANLI OYUN EKRANI -->
-  <div id="gameScreen" class="hidden">
-    <div class="score-board">
-      <div class="score-card red-score">Kırmızı: <span id="redCount">8</span></div>
-      <div class="turn-indicator turn-red" id="turnIndicator">Sıra: KIRMIZI</div>
-      <div class="score-card blue-score">Mavi: <span id="blueCount">8</span></div>
+    <div class="series" aria-label="Seri skoru">
+      <span class="series-label">SERİ</span>
+      <span class="series-num purple" id="seriesPurple">0</span>
+      <span class="series-sep">:</span>
+      <span class="series-num yellow" id="seriesYellow">0</span>
     </div>
 
-    <div class="controls">
-      <button class="btn btn-spymaster" id="spymasterBtn" onclick="toggleSpymaster()">Spymaster Modu: KAPALI</button>
-      <button class="btn btn-end-turn" onclick="endTurn()">Turu Bitir ⌛</button>
-      <button class="btn btn-reset" onclick="resetToSetup()">Yeni Oyun Kur ⚙️</button>
-    </div>
+    <nav class="top-actions">
+      <button class="btn btn-ghost btn-small" id="rulesBtn" type="button">NASIL OYNANIR</button>
+      <button class="btn btn-ghost btn-small" id="newGameBtn" type="button">YENİ OYUN</button>
+    </nav>
+  </header>
 
-    <div class="board" id="board"></div>
+  <main class="wrap">
+    <!-- KURULUM -->
+    <section id="setupScreen" class="screen">
+      <div class="setup-head">
+        <div class="setup-title">
+          <span class="kicker">20 İSİM · 2 TAKIM · 1 EFSANE</span>
+          <h1>KADROYU<br><span class="accent">KUR</span></h1>
+        </div>
+        <p class="setup-desc">
+          İsimleri gir, takımları belirle. <b class="p-purple">8 MOR</b>,
+          <b class="p-yellow">8 SARI</b> ve <b class="p-neutral">4 SİVİL</b> olmalı.
+          <span class="setup-hint">İpucu: <kbd>RANDOM</kbd> ile 200 isimlik havuzdan doldur.</span>
+        </p>
+      </div>
+
+      <div class="setup-grid" id="setupGrid"></div>
+
+      <div class="setup-actions">
+        <div class="counters" aria-live="polite">
+          <div class="counter" id="counterPurple" data-team="purple">
+            <span class="dot"></span><b>0</b><span class="counter-max">/8 MOR</span>
+          </div>
+          <div class="counter" id="counterYellow" data-team="yellow">
+            <span class="dot"></span><b>0</b><span class="counter-max">/8 SARI</span>
+          </div>
+          <div class="counter" id="counterNeutral" data-team="neutral">
+            <span class="dot"></span><b>0</b><span class="counter-max">/4 SİVİL</span>
+          </div>
+        </div>
+
+        <div class="setup-buttons">
+          <button class="btn btn-yellow btn-big" id="randomBtn" type="button">
+            <span class="dice">🎲</span> RANDOM
+          </button>
+          <button class="btn btn-ghost" id="clearBtn" type="button">TEMİZLE</button>
+          <button class="btn btn-purple btn-big" id="startBtn" type="button">
+            OYUNU BAŞLAT <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- OYUN -->
+    <section id="gameScreen" class="screen hidden">
+      <div class="scorebar">
+        <div class="team-panel purple" id="purplePanel">
+          <span class="team-tag">MOR TAKIM</span>
+          <span class="team-count" id="purpleCount">8</span>
+        </div>
+
+        <div class="turn-pill turn-purple" id="turnPill" aria-live="polite">
+          <span class="turn-label">SIRA</span>
+          <b id="turnTeam">MOR</b>
+        </div>
+
+        <div class="team-panel yellow" id="yellowPanel">
+          <span class="team-count" id="yellowCount">8</span>
+          <span class="team-tag">SARI TAKIM</span>
+        </div>
+      </div>
+
+      <div class="board" id="board" role="grid" aria-label="Oyun tahtası"></div>
+
+      <div class="game-actions">
+        <button class="btn btn-spy" id="spyBtn" type="button" aria-pressed="false">
+          <span class="eye">◉</span> SPYMASTER <span class="spy-state" id="spyState">KAPALI</span>
+        </button>
+        <button class="btn btn-ghost" id="endTurnBtn" type="button">TURU BİTİR</button>
+        <button class="btn btn-ghost" id="gameNewBtn" type="button">YENİ OYUN</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <img class="foot-logo" src="/logo-tile.png" alt="">
+    <span>MALUM MECRA</span>
+    <span class="foot-dot">•</span>
+    <span>3 KİŞİLİK YAYIN OYUNU</span>
+    <button class="link-btn" id="resetSeriesBtn" type="button">seriyi sıfırla</button>
+  </footer>
+
+  <!-- NASIL OYNANIR -->
+  <div class="modal hidden" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="modal-panel">
+      <button class="modal-close" id="rulesClose" type="button" aria-label="Kapat">✕</button>
+      <span class="kicker">OYUNUN KURALLARI</span>
+      <h2 id="rulesTitle">NASIL OYNANIR?</h2>
+      <ol class="rules-list">
+        <li><b>Kadroyu kur.</b> 20 ismi gir: 8 mor, 8 sarı, 4 sivil. Ya da <b>RANDOM</b> ile spor efsanelerinden doldur.</li>
+        <li><b>Spymaster’ı aç.</b> Sadece ekranı gören kişi renkleri görür; takım arkadaşları tahmin eder.</li>
+        <li><b>Tek kelimeyle anlat.</b> Takımının isimlerini bir kelime ve bir sayıyla tarif et: “Futbol, 3”.</li>
+        <li><b>Doğru tahmin.</b> Kendi rengindeki kartı açan takım sırasını korur.</li>
+        <li><b>Yanlış tahmin.</b> Rakibin ismini ya da sivil bir kartı açan takım sırasını kaybeder.</li>
+        <li><b>Zafer.</b> 8 ismin tamamını ilk açan takım turu kazanır. Seri skoru üstte sayılır.</li>
+      </ol>
+      <p class="rules-note">Codenames’ten esinlenilmiştir · Malum Mecra yayın oyunu</p>
+    </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    const setupScreen = document.getElementById('setupScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const setupGrid = document.getElementById('setupGrid');
-    const boardDiv = document.getElementById('board');
-    const spymasterBtn = document.getElementById('spymasterBtn');
-    const redCountSpan = document.getElementById('redCount');
-    const blueCountSpan = document.getElementById('blueCount');
-    const turnIndicator = document.getElementById('turnIndicator');
+  <!-- KAZANAN -->
+  <div class="win hidden" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-rays" aria-hidden="true"></div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="win-content">
+      <img class="win-logo" src="/logo-tile.png" alt="Malum Mecra">
+      <span class="kicker">TUR BİTTİ</span>
+      <h2 id="winTitle">MOR TAKIM KAZANDI</h2>
+      <p class="win-series">SERİ <b id="winSeries">1 : 0</b></p>
+      <div class="win-actions">
+        <button class="btn btn-yellow btn-big" id="winNewBtn" type="button">YENİ TUR</button>
+        <button class="btn btn-ghost" id="winCloseBtn" type="button">TABLOYA DÖN</button>
+      </div>
+    </div>
+  </div>
 
-    let isSpymaster = false;
-    let currentGameState = { board: [], currentTurn: 'red' };
+  <div class="toast hidden" id="toast" role="status"></div>
 
-    // 20 Tane Giriş Kutusu Oluştur
-    function createSetupInputs() {
-      setupGrid.innerHTML = '';
-      for (let i = 0; i < 20; i++) {
-        const item = document.createElement('div');
-        item.className = 'setup-item';
-        item.innerHTML = `
-          <input type="text" id="word-${i}" placeholder="Kelime ${i + 1}" required />
-          <select id="type-${i}">
-            <option value="red" class="select-red">Kırmızı</option>
-            <option value="blue" class="select-blue">Mavi</option>
-            <option value="neutral" class="select-neutral">Sivil (Gri)</option>
-          </select>
-        `;
-        setupGrid.appendChild(item);
-      }
-    }
-
-    // 8 Kırmızı, 8 Mavi, 4 Nötral Rastgele Şablon Doldur
-    function fillRandomTemplate() {
-      const ornekKelimeler = [
-        "Messi", "Ronaldo", "Neymar", "Mbappe", "Haaland", "Maradona", "Pele", 
-        "Zidane", "Ronaldinho", "Cruyff", "Lewandowski", "Salah", "De Bruyne", 
-        "Modric", "Benzema", "Icardi", "Dzeko", "Tadic", "Aboubakar", "Muslera", 
-        "Arda Güler", "Hakan Çalhanoğlu", "Kerem Aktürkoğlu", "Semih Kılıçsoy", "Barış Alper Yılmaz",
-        "Buffon", "Neuer", "Sergio Ramos", "Beckham", "Henry", "Eto'o", "Drogba", "Michael Jordan", 
-        "LeBron James", "Kobe Bryant", "Steph Curry", "Shaquille O'Neal", "Cedi Osman", "Alperen Şengün", 
-        "Ömer Faruk Yurtseven", "Furkan Korkmaz", "Shane Larkin", "Giannis Antetokounmpo", "Luka Doncic", 
-        "Nikola Jokic", "Kevin Durant", "Wembanyama", "Magic Johnson", "Larry Bird", "Dennis Rodman", 
-        "Kyrie Irving", "James Harden", "Roger Federer", "Rafael Nadal", "Novak Djokovic", "Carlos Alcaraz", 
-        "Jannik Sinner", "Serena Williams", "Iga Swiatek", "Aryna Sabalenka", "Maria Sharapova", "Andy Murray", 
-        "Stefanos Tsitsipas", "Daniil Medvedev", "Coco Gauff", "Venus Williams", "Marsel İlhan", "Lewis Hamilton", 
-        "Max Verstappen", "Michael Schumacher", "Ayrton Senna", "Charles Leclerc", "Lando Norris", "Fernando Alonso", 
-        "Sebastian Vettel", "Carlos Sainz", "Oscar Piastri", "George Russell", "Kimi Raikkonen", "Daniel Ricciardo", 
-        "Sergio Perez", "Niki Lauda"
-      ];
-      
-      // Kelimeleri Karıştır
-      const karisikKelimeler = [...ornekKelimeler].sort(() => 0.5 - Math.random());
-
-      // Tipleri Karıştır
-      let tipler = [
-        ...Array(8).fill('red'), 
-        ...Array(8).fill('blue'), 
-        ...Array(4).fill('neutral')
-      ].sort(() => 0.5 - Math.random());
-
-      for (let i = 0; i < 20; i++) {
-        document.getElementById(`word-${i}`).value = karisikKelimeler[i];
-        document.getElementById(`type-${i}`).value = tipler[i];
-      }
-    }
-
-    function submitCustomGame() {
-      let customBoard = [];
-      for (let i = 0; i < 20; i++) {
-        const wordInput = document.getElementById(`word-${i}`);
-        const typeSelect = document.getElementById(`type-${i}`);
-        
-        if (!wordInput || !typeSelect) return;
-
-        const word = wordInput.value.trim().toUpperCase();
-        const type = typeSelect.value;
-
-        if (!word) {
-          alert(`Lütfen ${i + 1}. kelimeyi boş bırakmayın!`);
-          return;
-        }
-
-        customBoard.push({
-          id: i,
-          word: word,
-          type: type,
-          revealed: false
-        });
-      }
-
-      socket.emit('setupCustomGame', customBoard);
-    }
-
-    function toggleSpymaster() {
-      isSpymaster = !isSpymaster;
-      if (isSpymaster) {
-        spymasterBtn.innerText = "Spymaster Modu: AÇIK";
-        spymasterBtn.style.backgroundColor = "#27ae60";
-        boardDiv.classList.add('spymaster-mode');
-      } else {
-        spymasterBtn.innerText = "Spymaster Modu: KAPALI";
-        spymasterBtn.style.backgroundColor = "#f39c12";
-        boardDiv.classList.remove('spymaster-mode');
-      }
-      renderBoard();
-    }
-
-    function endTurn() {
-      socket.emit('endTurn');
-    }
-
-    function resetToSetup() {
-      if (confirm("Kurulum ekranına dönmek istediğinize emin misiniz? Masa sıfırlanacak.")) {
-        socket.emit('resetToSetup');
-      }
-    }
-
-    socket.on('gameUpdate', (state) => {
-      currentGameState = state;
-
-      if (!state.isSetup) {
-        setupScreen.classList.remove('hidden');
-        gameScreen.classList.add('hidden');
-        // Ekran gösterildiğinde girdilerin varlığından emin ol
-        if (setupGrid.children.length === 0) {
-          createSetupInputs();
-        }
-      } else {
-        setupScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        renderBoard();
-        updateHeaderInfo();
-      }
-    });
-
-    function updateHeaderInfo() {
-      const remainingRed = currentGameState.board.filter(c => c.type === 'red' && !c.revealed).length;
-      const remainingBlue = currentGameState.board.filter(c => c.type === 'blue' && !c.revealed).length;
-      
-      redCountSpan.innerText = remainingRed;
-      blueCountSpan.innerText = remainingBlue;
-
-      if (currentGameState.currentTurn === 'red') {
-        turnIndicator.innerText = "Sıra: KIRMIZI";
-        turnIndicator.className = "turn-indicator turn-red";
-      } else {
-        turnIndicator.innerText = "Sıra: MAVİ";
-        turnIndicator.className = "turn-indicator turn-blue";
-      }
-    }
-
-    function renderBoard() {
-      boardDiv.innerHTML = '';
-
-      currentGameState.board.forEach((card) => {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'card';
-        cardElement.innerText = card.word;
-
-        cardElement.classList.add(card.type);
-
-        if (card.revealed) {
-          cardElement.classList.add('revealed');
-        }
-
-        cardElement.onclick = () => {
-          if (!card.revealed) {
-            socket.emit('clickCard', card.id);
-          }
-        };
-
-        boardDiv.appendChild(cardElement);
-      });
-    }
-
-    // Sayfa açılır açılmaz girdileri oluştur
-    createSetupInputs();
-  </script>
+  <script src="/names.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
