@@ -25,28 +25,44 @@
       </span>
     </a>
     <nav class="top-actions">
+      <button class="btn btn-ghost btn-small" id="streamBtn" type="button">YAYIN MODU</button>
       <a class="btn btn-ghost btn-small" href="/">← OYUNLAR</a>
       <a class="btn btn-ghost btn-small" href="/malumnames">MALUM NAMES</a>
     </nav>
   </header>
 
   <main class="fufu">
+    <!-- KAÇ KİŞİ -->
+    <section id="countScreen" class="screen count-screen">
+      <div class="count-hero">
+        <span class="kicker">1. ADIM</span>
+        <h1>KAÇ <span>KİŞİ?</span></h1>
+        <p>Yarışacak kişi sayısını seç. Seçtiğin sayı kadar isim alanı açılacak.</p>
+
+        <div class="count-cards" role="group" aria-label="Katılımcı sayısı">
+          <button class="count-card" type="button" data-count="8"><b>8</b><span>KİŞİ</span></button>
+          <button class="count-card" type="button" data-count="16"><b>16</b><span>KİŞİ</span></button>
+          <button class="count-card" type="button" data-count="32"><b>32</b><span>KİŞİ</span></button>
+        </div>
+
+        <p class="count-note">İstersen sonra “Değiştir” ile sayıyı güncelleyebilirsin.</p>
+      </div>
+    </section>
+
     <!-- KURULUM -->
-    <section id="setupScreen" class="screen">
+    <section id="setupScreen" class="screen hidden">
       <div class="setup-head">
         <div>
           <span class="kicker">FOTOĞRAFLI ELEME YARIŞMASI</span>
           <h1>YARIŞMAYI <span>KUR</span></h1>
         </div>
-        <p>Katılımcı sayısını seç, isimleri ve fotoğrafları ekle. Eşleşmeler sırayla ekrana gelecek; her turda kazanan bir üst tura çıkacak.</p>
-      </div>
-
-      <div class="count-bar">
-        <span class="count-title">KATILIMCI SAYISI</span>
-        <div class="count-options" role="group" aria-label="Katılımcı sayısı">
-          <button class="count-btn active" type="button" data-count="8"><b>8</b><span>4 eşleşme</span></button>
-          <button class="count-btn" type="button" data-count="16"><b>16</b><span>8 eşleşme</span></button>
-          <button class="count-btn" type="button" data-count="32"><b>32</b><span>16 eşleşme</span></button>
+        <div class="setup-side">
+          <p>İsimleri ve fotoğrafları ekle, eşleşmeleri kontrol et. Yarışma başlayınca eşleşmeler tek tek ve otomatik olarak ekrana gelecek.</p>
+          <div class="setup-count">
+            <span>KATILIMCI SAYISI</span>
+            <b id="setupCount">8</b>
+            <button class="chip-btn" id="changeCountBtn" type="button">DEĞİŞTİR</button>
+          </div>
         </div>
       </div>
 
@@ -105,14 +121,15 @@
     <span>HER EŞLEŞMEDE BİR İSİM ELENİR</span>
   </footer>
 
-  <!-- TUR SONU / FİNAL GİRİŞİ -->
+  <!-- TUR SONU / FİNAL GİRİŞİ (otomatik) -->
   <div class="interlude hidden" id="interlude" role="dialog" aria-modal="true" aria-labelledby="interTitle">
     <div class="inter-content">
       <span class="kicker" id="interKicker">TUR TAMAMLANDI</span>
       <h2 id="interTitle">YARI FİNAL</h2>
       <p class="inter-text" id="interText">2 eşleşme</p>
       <div class="inter-names" id="interNames"></div>
-      <button class="btn btn-yellow btn-big" id="continueBtn" type="button">DEVAM <span>→</span></button>
+      <div class="inter-auto"><span id="interBar"></span></div>
+      <p class="inter-hint">OTOMATİK GEÇİŞ…</p>
     </div>
   </div>
 
@@ -134,6 +151,8 @@
       </div>
     </div>
   </div>
+
+  <button class="stream-exit" id="streamExit" type="button">YAYIN MODU · ÇIKIŞ (ESC)</button>
 
   <div class="toast hidden" id="toast" role="status"></div>
 

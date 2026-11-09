@@ -2,7 +2,7 @@
 
 /* ================================================================
    MALUM FUFU — fotoğraflı eleme yarışması
-   8 / 16 / 32 kişi · eşleşmeler tek tek · turlar arası "Devam"
+   8 / 16 / 32 kişi · eşleşmeler tek tek · otomatik tur geçişi
    ================================================================ */
 
 const STORAGE_KEY = 'malumfufu.v1';
@@ -12,12 +12,15 @@ const DEFAULT_COUNT = 8;
 const $ = (sel) => document.querySelector(sel);
 
 const els = {
+  countScreen: $('#countScreen'),
   setup: $('#setupScreen'),
   game: $('#gameScreen'),
   grid: $('#participantGrid'),
   countBadge: $('#countBadge'),
   pairs: $('#pairsList'),
   pairHint: $('#pairHint'),
+  setupCount: $('#setupCount'),
+  changeCountBtn: $('#changeCountBtn'),
   shuffleBtn: $('#shuffleBtn'),
   clearBtn: $('#clearBtn'),
   startBtn: $('#startBtn'),
@@ -32,24 +35,28 @@ const els = {
   interTitle: $('#interTitle'),
   interText: $('#interText'),
   interNames: $('#interNames'),
-  continueBtn: $('#continueBtn'),
+  interBar: $('#interBar'),
   win: $('#winOverlay'),
   winnerPhoto: $('#winnerPhoto'),
   winnerName: $('#winnerName'),
   confetti: $('#confetti'),
+  streamBtn: $('#streamBtn'),
+  streamExit: $('#streamExit'),
   toast: $('#toast')
 };
 
 let state = {
-  count: DEFAULT_COUNT,
+  count: 0,
   participants: [],
   pairs: [],
   tournament: null,
-  demo: false
+  demo: false,
+  stream: false
 };
 
 let saveTimer = null;
 let advanceTimer = null;
+let interludeTimer = null;
 let toastTimer = null;
 
 /* ---------------------------------------------------------------- */
@@ -124,7 +131,7 @@ function saveSoon() {
 
 function normalizeCount(value) {
   const n = Number(value);
-  return ALLOWED_COUNTS.includes(n) ? n : DEFAULT_COUNT;
+  return ALLOWED_COUNTS.includes(n) ? n : 0;
 }
 
 function resizeParticipants() {
@@ -147,14 +154,23 @@ function load() {
       }));
     }
 
-    state.count = normalizeCount(data.count || state.participants.length);
-    resizeParticipants();
+    state.count = normalizeCount(data.count);
+    if (!state.count && ALLOWED_COUNTS.includes(state.participants.length)) {
+      state.count = state.participants.length;
+    }
 
-    state.pairs = Array.isArray(data.pairs) ? data.pairs : [];
-    if (state.pairs.length !== state.count / 2) autoPair();
+    if (state.count) {
+      resizeParticipants();
+      state.pairs = Array.isArray(data.pairs) ? data.pairs : [];
+      if (state.pairs.length !== state.count / 2) autoPair();
+    } else {
+      state.participants = [];
+      state.pairs = [];
+    }
 
     const t = data.tournament;
-    const validTournament = t
+    const validTournament = state.count > 0
+      && t
       && typeof t.roundIndex === 'number'
       && typeof t.matchIndex === 'number'
       && typeof t.stage === 'string'
@@ -222,22 +238,39 @@ function autoPair() {
   state.pairs = pairs;
 }
 
+function chooseCount(count) {
+  if (!ALLOWED_COUNTS.includes(count)) return;
+
+  if (state.count === 0) {
+    state.count = count;
+    state.participants = defaultParticipants(count);
+    autoPair();
+  } else if (state.count !== count) {
+    if (!setCount(count)) return;
+  }
+
+  showSetup();
+  saveNow();
+}
+
 function setCount(count) {
-  if (!ALLOWED_COUNTS.includes(count) || count === state.count) return;
+  if (!ALLOWED_COUNTS.includes(count) || count === state.count) return true;
 
   if (count < state.count) {
     const removed = state.participants.slice(count);
     const hasData = removed.some((p) => p.name.trim() || p.img);
     if (hasData && !confirm(`Katılımcı sayısı ${count} olarak değişsin mi? Fazla isim ve fotoğraflar silinecek.`)) {
-      return;
+      return false;
     }
   }
 
   state.count = count;
   resizeParticipants();
   autoPair();
-  renderSetup();
+
+  if (!els.setup.classList.contains('hidden')) renderSetup();
   saveNow();
+  return true;
 }
 
 function renderParticipants() {
@@ -437,10 +470,15 @@ function updateFlowHint() {
   els.flowHint.textContent = roundFlow(state.count);
 }
 
-function renderSetup() {
-  document.querySelectorAll('.count-btn').forEach((btn) => {
+function renderCountScreen() {
+  document.querySelectorAll('.count-card').forEach((btn) => {
     btn.classList.toggle('active', Number(btn.dataset.count) === state.count);
   });
+}
+
+function renderSetup() {
+  renderCountScreen();
+  els.setupCount.textContent = String(state.count);
 
   renderParticipants();
   renderPairs();
@@ -533,7 +571,17 @@ function startTournament(silent) {
   return true;
 }
 
+function showCountScreen() {
+  els.countScreen.classList.remove('hidden');
+  els.setup.classList.add('hidden');
+  els.game.classList.add('hidden');
+  els.interlude.classList.add('hidden');
+  els.win.classList.add('hidden');
+  renderCountScreen();
+}
+
 function showSetup() {
+  els.countScreen.classList.add('hidden');
   els.setup.classList.remove('hidden');
   els.game.classList.add('hidden');
   els.interlude.classList.add('hidden');
@@ -542,6 +590,7 @@ function showSetup() {
 }
 
 function showGame() {
+  els.countScreen.classList.add('hidden');
   els.setup.classList.add('hidden');
   els.game.classList.remove('hidden');
   els.interlude.classList.add('hidden');
@@ -701,9 +750,19 @@ function showInterlude(nextRound) {
   });
 
   els.interlude.classList.remove('hidden');
+
+  if (els.interBar) {
+    els.interBar.classList.remove('run');
+    void els.interBar.offsetWidth;
+    els.interBar.classList.add('run');
+  }
+
+  clearTimeout(interludeTimer);
+  interludeTimer = setTimeout(() => continueRound(), 2200);
 }
 
 function continueRound() {
+  clearTimeout(interludeTimer);
   const t = state.tournament;
   if (!t || t.stage !== 'interlude') return;
 
@@ -723,6 +782,7 @@ function finish(winnerId) {
   t.winner = winnerId;
   t.stage = 'champion';
   clearTimeout(advanceTimer);
+  clearTimeout(interludeTimer);
 
   renderChampion();
   saveNow();
@@ -869,6 +929,20 @@ function demoCompleteRound(winners) {
 }
 
 function runDemo(mode) {
+  if (mode === 'gate16') {
+    state.demo = true;
+    state.count = 0;
+    state.participants = [];
+    state.pairs = [];
+    state.tournament = null;
+    showCountScreen();
+    setTimeout(() => {
+      const btn = document.querySelector('.count-card[data-count="16"]');
+      if (btn) btn.click();
+    }, 120);
+    return;
+  }
+
   const demoCount = mode === 'setup16' ? 16 : mode === 'setup32' ? 32 : 8;
   demoSetup(demoCount);
 
@@ -885,10 +959,7 @@ function runDemo(mode) {
         clearInterval(timer);
         return;
       }
-      if (!els.interlude.classList.contains('hidden')) {
-        els.continueBtn.click();
-        return;
-      }
+      if (!els.interlude.classList.contains('hidden')) return;
       const active = els.arena.querySelector('.fighter:not(:disabled)');
       if (active) active.click();
     }, 1200);
@@ -919,10 +990,33 @@ function runDemo(mode) {
 /* Olaylar                                                           */
 /* ---------------------------------------------------------------- */
 
+function applyStream() {
+  document.body.classList.toggle('stream-mode', state.stream);
+  if (els.streamBtn) {
+    els.streamBtn.textContent = state.stream ? 'YAYIN MODU: AÇIK' : 'YAYIN MODU';
+    els.streamBtn.classList.toggle('on', state.stream);
+  }
+}
+
+function toggleStream() {
+  state.stream = !state.stream;
+  try {
+    localStorage.setItem('malumfufu.stream', state.stream ? '1' : '0');
+  } catch {
+    /* yoksay */
+  }
+  applyStream();
+  if (state.stream) toast('Yayın modu açık · çıkmak için Esc');
+}
+
 function bind() {
-  document.querySelectorAll('.count-btn').forEach((btn) => {
-    btn.addEventListener('click', () => setCount(Number(btn.dataset.count)));
+  document.querySelectorAll('.count-card').forEach((btn) => {
+    btn.addEventListener('click', () => chooseCount(Number(btn.dataset.count)));
   });
+
+  els.changeCountBtn.addEventListener('click', showCountScreen);
+  els.streamBtn.addEventListener('click', toggleStream);
+  els.streamExit.addEventListener('click', toggleStream);
 
   els.shuffleBtn.addEventListener('click', () => {
     state.participants = shuffle(state.participants);
@@ -942,16 +1036,19 @@ function bind() {
   });
 
   els.startBtn.addEventListener('click', () => startTournament(false));
-  els.continueBtn.addEventListener('click', continueRound);
 
   els.quitBtn.addEventListener('click', () => {
     if (!confirm('Yarışmadan çıkılsın mı? İsimler, fotoğraflar ve eşleşmeler korunur.')) return;
+    clearTimeout(advanceTimer);
+    clearTimeout(interludeTimer);
     state.tournament = null;
     showSetup();
     saveNow();
   });
 
   $('#againBtn').addEventListener('click', () => {
+    clearTimeout(advanceTimer);
+    clearTimeout(interludeTimer);
     state.tournament = null;
     showSetup();
     saveNow();
@@ -962,7 +1059,12 @@ function bind() {
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') els.win.classList.add('hidden');
+    if (event.key !== 'Escape') return;
+    if (!els.win.classList.contains('hidden')) {
+      els.win.classList.add('hidden');
+      return;
+    }
+    if (state.stream) toggleStream();
   });
 }
 
@@ -973,8 +1075,16 @@ function bind() {
 function boot() {
   bind();
 
+  state.stream = localStorage.getItem('malumfufu.stream') === '1';
+  applyStream();
+
   const params = new URLSearchParams(location.search);
   const demo = params.get('demo');
+
+  if (params.get('stream') === '1') {
+    state.stream = true;
+    applyStream();
+  }
 
   if (demo) {
     runDemo(demo);
@@ -983,11 +1093,10 @@ function boot() {
 
   const loaded = load();
 
-  if (!loaded || !state.participants.length) {
-    state.count = DEFAULT_COUNT;
-    state.participants = defaultParticipants(state.count);
-    autoPair();
-    saveNow();
+  if (!loaded) {
+    state.count = 0;
+    state.participants = [];
+    state.pairs = [];
   }
 
   if (state.tournament) {
@@ -1009,7 +1118,6 @@ function boot() {
 
     if (state.tournament.stage === 'interlude') {
       showGame();
-      renderMatch();
       showInterlude(state.tournament.rounds[state.tournament.roundIndex + 1]);
       return;
     }
@@ -1018,7 +1126,7 @@ function boot() {
     return;
   }
 
-  showSetup();
+  showCountScreen();
 }
 
 boot();

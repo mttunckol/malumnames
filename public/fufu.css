@@ -748,3 +748,223 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------------------------------------------------------------- */
+/* Kaç kişi? (ilk adım)                                              */
+/* ---------------------------------------------------------------- */
+
+.count-screen {
+  justify-content: center;
+  align-items: center;
+}
+
+.count-hero {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(10px, 3vh, 40px) 0;
+  text-align: center;
+}
+
+.count-hero h1 {
+  margin: 10px 0 12px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(54px, 7vw, 122px);
+  line-height: 1.06;
+  letter-spacing: 0.01em;
+  margin: 18px 0 28px;
+  transform: skewX(-3deg);
+}
+.count-hero h1 span { color: var(--yellow); text-shadow: 0 0 40px rgba(238, 197, 106, 0.3); }
+
+.count-hero > p {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: clamp(13px, 1vw, 16px);
+  line-height: 1.55;
+}
+
+.count-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 24px);
+  margin-top: clamp(20px, 3.4vh, 42px);
+}
+
+.count-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: clamp(22px, 3vw, 44px) 16px;
+  border-radius: clamp(18px, 1.8vw, 26px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(179, 148, 212, 0.16), transparent 60%),
+    linear-gradient(165deg, #2c1f3a 0%, #1d1429 100%);
+  color: var(--ink);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.count-card b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(72px, 8.2vw, 142px);
+  line-height: 0.92;
+}
+.count-card span {
+  font-size: clamp(9px, 0.66vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  color: var(--muted);
+}
+.count-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(238, 197, 106, 0.55);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.4);
+}
+.count-card:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
+.count-card.active {
+  border-color: rgba(238, 197, 106, 0.65);
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(238, 197, 106, 0.18), transparent 60%),
+    linear-gradient(165deg, #33243f 0%, #1d1429 100%);
+  box-shadow: 0 0 50px rgba(238, 197, 106, 0.14);
+}
+
+.count-note {
+  margin: 18px 0 0 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.1em;
+  color: rgba(179, 162, 194, 0.6) !important;
+}
+
+/* ---------------------------------------------------------------- */
+/* Kurulum: sayı özeti                                               */
+/* ---------------------------------------------------------------- */
+
+.setup-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.setup-count {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.035);
+}
+.setup-count > span {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+.setup-count b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(20px, 1.6vw, 26px);
+  line-height: 1;
+  color: var(--yellow);
+}
+.chip-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+.chip-btn:hover { border-color: rgba(238, 197, 106, 0.55); color: var(--yellow); }
+
+/* ---------------------------------------------------------------- */
+/* Otomatik tur geçişi                                               */
+/* ---------------------------------------------------------------- */
+
+.inter-auto {
+  width: min(320px, 60vw);
+  height: 6px;
+  margin: 22px auto 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.inter-auto span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--purple) 0%, var(--yellow) 100%);
+}
+.inter-auto span.run { animation: inter-fill 2.2s linear forwards; }
+@keyframes inter-fill { to { width: 100%; } }
+
+.inter-hint {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  color: rgba(179, 162, 194, 0.6);
+}
+
+/* ---------------------------------------------------------------- */
+/* Yayın modu                                                        */
+/* ---------------------------------------------------------------- */
+
+body.stream-mode .topbar,
+body.stream-mode .foot,
+body.stream-mode .round-actions {
+  display: none !important;
+}
+body.stream-mode .fufu { padding-top: clamp(8px, 1.4vh, 16px); }
+body.stream-mode .round-bar {
+  justify-content: center;
+  gap: clamp(20px, 4vw, 56px);
+}
+body.stream-mode .arena-match { width: min(1500px, 96vw); }
+
+.stream-exit {
+  display: none;
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 60;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(21, 14, 31, 0.85);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+body.stream-mode .stream-exit { display: inline-flex; }
+.stream-exit:hover { color: var(--yellow); border-color: rgba(238, 197, 106, 0.5); }
+
+@media (max-width: 760px) {
+  .count-cards { grid-template-columns: 1fr; }
+  .count-card { padding: 20px 16px; }
+  .count-card b { font-size: 64px; }
+  .setup-side { align-items: flex-start; }
+  .setup-count { align-self: flex-start; }
+}
