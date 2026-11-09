@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malum Fufu — Eleme Yarışması</title>
+  <meta name="description" content="Malum Fufu: fotoğraflı eleme yarışması. Eşleşmeleri kur, kazananları seç, finalde tek isim kalsın.">
+  <meta name="theme-color" content="#150e1f">
+  <meta property="og:title" content="Malum Fufu — Eleme Yarışması">
+  <meta property="og:description" content="Fotoğraflar karşı karşıya. Kazanan bir üst tura.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/logo-tile.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/fufu.css">
+</head>
+<body class="fufu-page">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Malum Mecra ana sayfa">
+      <img class="brand-mark" src="/logo-tile.png" alt="Malum Mecra logosu" width="52" height="52">
+      <span class="brand-text">
+        <strong>MALUM FUFU</strong>
+        <small>ELEME YARIŞMASI</small>
+      </span>
+    </a>
+    <nav class="top-actions">
+      <a class="btn btn-ghost btn-small" href="/">← OYUNLAR</a>
+      <a class="btn btn-ghost btn-small" href="/malumnames">MALUM NAMES</a>
+    </nav>
+  </header>
+
+  <main class="fufu">
+    <!-- KURULUM -->
+    <section id="setupScreen" class="screen">
+      <div class="setup-head">
+        <div>
+          <span class="kicker">FOTOĞRAFLI ELEME YARIŞMASI</span>
+          <h1>YARIŞMAYI <span>KUR</span></h1>
+        </div>
+        <p>Katılımcıları ekle, fotoğraflarını yükle ve 1. tur eşleşmelerini belirle. Her turda kazanan bir üst tura çıkar; finalde tek isim kalır.</p>
+      </div>
+
+      <div class="setup-layout">
+        <div class="panel participants-panel">
+          <div class="panel-head">
+            <h2>KATILIMCILAR</h2>
+            <span class="count-badge" id="countBadge">0 katılımcı</span>
+          </div>
+          <div class="participant-grid" id="participantGrid"></div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost" id="addBtn" type="button">+ KATILIMCI EKLE</button>
+            <button class="btn btn-ghost" id="shuffleBtn" type="button">KARIŞTIR</button>
+            <button class="btn btn-ghost" id="clearBtn" type="button">TEMİZLE</button>
+          </div>
+        </div>
+
+        <aside class="panel pairs-panel">
+          <div class="panel-head">
+            <h2>1. TUR EŞLEŞMELERİ</h2>
+            <span class="hint" id="pairHint">—</span>
+          </div>
+          <div class="pairs" id="pairsList"></div>
+          <button class="btn btn-yellow btn-big start-btn" id="startBtn" type="button">
+            YARIŞMAYI BAŞLAT <span>→</span>
+          </button>
+          <p class="pairs-note">4, 8, 16 veya 32 katılımcı olmalı. İsimler zorunlu, fotoğraflar opsiyonel.</p>
+          <div class="flow" id="flowHint">—</div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- OYUN -->
+    <section id="gameScreen" class="screen hidden">
+      <div class="round-bar">
+        <div class="round-info">
+          <span class="kicker">TUR</span>
+          <h1 id="roundLabel">ÇEYREK FİNAL</h1>
+        </div>
+        <div class="round-progress">
+          <div class="progress-track"><span id="progressFill"></span></div>
+          <span class="progress-text" id="progressText">0/4</span>
+        </div>
+        <div class="round-actions">
+          <button class="btn btn-ghost btn-small" id="undoBtn" type="button">↶ GERİ AL</button>
+          <button class="btn btn-ghost btn-small" id="quitBtn" type="button">YARIŞMAYI BIRAK</button>
+        </div>
+      </div>
+      <div class="matches" id="matches"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <img class="foot-logo" src="/logo-tile.png" alt="">
+    <span>MALUM FUFU</span>
+    <span class="foot-dot">•</span>
+    <span>HER TURDA BİR İSİM ELENİR</span>
+  </footer>
+
+  <!-- KAZANAN -->
+  <div class="win hidden" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-rays" aria-hidden="true"></div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="win-content">
+      <img class="win-logo" src="/logo-tile.png" alt="">
+      <span class="kicker">YARIŞMA BİTTİ</span>
+      <h2 id="winTitle">MALUM KAZANAN</h2>
+      <div class="winner-card">
+        <div class="winner-photo" id="winnerPhoto"></div>
+        <div class="winner-name" id="winnerName">—</div>
+      </div>
+      <div class="win-actions">
+        <button class="btn btn-yellow btn-big" id="againBtn" type="button">YENİ YARIŞMA</button>
+        <button class="btn btn-ghost" id="closeWinBtn" type="button">FİNALİ GÖR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+
+  <script src="/fufu.js"></script>
+</body>
+</html>

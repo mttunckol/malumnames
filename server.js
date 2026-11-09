@@ -282,6 +282,14 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 405, { ok: false, error: 'Desteklenmeyen metot.' });
   }
 
+  // Temiz URL yönlendirmeleri
+  if (pathname === '/malumnames') {
+    return serveFile(res, path.join(PUBLIC_DIR, 'malumnames.html'));
+  }
+  if (pathname === '/malumfufu') {
+    return serveFile(res, path.join(PUBLIC_DIR, 'malumfufu.html'));
+  }
+
   // Statik dosyalar
   let filePath = pathname === '/' ? path.join(PUBLIC_DIR, 'index.html') : path.join(PUBLIC_DIR, pathname);
   const resolved = path.resolve(filePath);

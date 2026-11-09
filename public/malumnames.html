@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malum Mecra — Yayın Oyunu</title>
+  <meta name="description" content="Malum Mecra: yayın için spor temalı isim tahmin oyunu. 20 isim, 8 mor, 8 sarı, 4 sivil.">
+  <meta name="theme-color" content="#150e1f">
+  <meta property="og:title" content="Malum Mecra — Yayın Oyunu">
+  <meta property="og:description" content="Sporun efsaneleriyle oynanan takım oyunu.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/logo-tile.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Malum Mecra ana sayfa">
+      <img class="brand-mark" src="/logo-tile.png" alt="Malum Mecra logosu" width="52" height="52">
+      <span class="brand-text">
+        <strong>MALUM MECRA</strong>
+        <small>YAYIN OYUNU</small>
+      </span>
+    </a>
+
+    <div class="series" aria-label="Seri skoru">
+      <span class="series-label">SERİ</span>
+      <span class="series-num purple" id="seriesPurple">0</span>
+      <span class="series-sep">:</span>
+      <span class="series-num yellow" id="seriesYellow">0</span>
+    </div>
+
+    <nav class="top-actions">
+      <a class="btn btn-ghost btn-small" href="/">← OYUNLAR</a>
+      <button class="btn btn-ghost btn-small" id="rulesBtn" type="button">NASIL OYNANIR</button>
+      <button class="btn btn-ghost btn-small" id="newGameBtn" type="button">YENİ OYUN</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- KURULUM -->
+    <section id="setupScreen" class="screen">
+      <div class="setup-head">
+        <div class="setup-title">
+          <span class="kicker">20 İSİM · 2 TAKIM · 1 EFSANE</span>
+          <h1>KADROYU<br><span class="accent">KUR</span></h1>
+        </div>
+        <p class="setup-desc">
+          İsimleri gir, takımları belirle. <b class="p-purple">8 MOR</b>,
+          <b class="p-yellow">8 SARI</b> ve <b class="p-neutral">4 SİVİL</b> olmalı.
+          <span class="setup-hint">İpucu: <kbd>RANDOM</kbd> ile 200 isimlik havuzdan doldur.</span>
+        </p>
+      </div>
+
+      <div class="setup-grid" id="setupGrid"></div>
+
+      <div class="setup-actions">
+        <div class="counters" aria-live="polite">
+          <div class="counter" id="counterPurple" data-team="purple">
+            <span class="dot"></span><b>0</b><span class="counter-max">/8 MOR</span>
+          </div>
+          <div class="counter" id="counterYellow" data-team="yellow">
+            <span class="dot"></span><b>0</b><span class="counter-max">/8 SARI</span>
+          </div>
+          <div class="counter" id="counterNeutral" data-team="neutral">
+            <span class="dot"></span><b>0</b><span class="counter-max">/4 SİVİL</span>
+          </div>
+        </div>
+
+        <div class="setup-buttons">
+          <button class="btn btn-yellow btn-big" id="randomBtn" type="button">
+            <span class="dice">🎲</span> RANDOM
+          </button>
+          <button class="btn btn-ghost" id="clearBtn" type="button">TEMİZLE</button>
+          <button class="btn btn-purple btn-big" id="startBtn" type="button">
+            OYUNU BAŞLAT <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- OYUN -->
+    <section id="gameScreen" class="screen hidden">
+      <div class="scorebar">
+        <div class="team-panel purple" id="purplePanel">
+          <span class="team-tag">MOR TAKIM</span>
+          <span class="team-count" id="purpleCount">8</span>
+        </div>
+
+        <div class="turn-pill turn-purple" id="turnPill" aria-live="polite">
+          <span class="turn-label">SIRA</span>
+          <b id="turnTeam">MOR</b>
+        </div>
+
+        <div class="team-panel yellow" id="yellowPanel">
+          <span class="team-count" id="yellowCount">8</span>
+          <span class="team-tag">SARI TAKIM</span>
+        </div>
+      </div>
+
+      <div class="board" id="board" role="grid" aria-label="Oyun tahtası"></div>
+
+      <div class="game-actions">
+        <button class="btn btn-spy" id="spyBtn" type="button" aria-pressed="false">
+          <span class="eye">◉</span> SPYMASTER <span class="spy-state" id="spyState">KAPALI</span>
+        </button>
+        <button class="btn btn-ghost" id="endTurnBtn" type="button">TURU BİTİR</button>
+        <button class="btn btn-ghost" id="gameNewBtn" type="button">YENİ OYUN</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <img class="foot-logo" src="/logo-tile.png" alt="">
+    <span>MALUM MECRA</span>
+    <span class="foot-dot">•</span>
+    <span>3 KİŞİLİK YAYIN OYUNU</span>
+    <button class="link-btn" id="resetSeriesBtn" type="button">seriyi sıfırla</button>
+  </footer>
+
+  <!-- NASIL OYNANIR -->
+  <div class="modal hidden" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="modal-panel">
+      <button class="modal-close" id="rulesClose" type="button" aria-label="Kapat">✕</button>
+      <span class="kicker">OYUNUN KURALLARI</span>
+      <h2 id="rulesTitle">NASIL OYNANIR?</h2>
+      <ol class="rules-list">
+        <li><b>Kadroyu kur.</b> 20 ismi gir: 8 mor, 8 sarı, 4 sivil. Ya da <b>RANDOM</b> ile spor efsanelerinden doldur.</li>
+        <li><b>Spymaster’ı aç.</b> Sadece ekranı gören kişi renkleri görür; takım arkadaşları tahmin eder.</li>
+        <li><b>Tek kelimeyle anlat.</b> Takımının isimlerini bir kelime ve bir sayıyla tarif et: “Futbol, 3”.</li>
+        <li><b>Doğru tahmin.</b> Kendi rengindeki kartı açan takım sırasını korur.</li>
+        <li><b>Yanlış tahmin.</b> Rakibin ismini ya da sivil bir kartı açan takım sırasını kaybeder.</li>
+        <li><b>Zafer.</b> 8 ismin tamamını ilk açan takım turu kazanır. Seri skoru üstte sayılır.</li>
+      </ol>
+      <p class="rules-note">Codenames’ten esinlenilmiştir · Malum Mecra yayın oyunu</p>
+    </div>
+  </div>
+
+  <!-- KAZANAN -->
+  <div class="win hidden" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-rays" aria-hidden="true"></div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="win-content">
+      <img class="win-logo" src="/logo-tile.png" alt="Malum Mecra">
+      <span class="kicker">TUR BİTTİ</span>
+      <h2 id="winTitle">MOR TAKIM KAZANDI</h2>
+      <p class="win-series">SERİ <b id="winSeries">1 : 0</b></p>
+      <div class="win-actions">
+        <button class="btn btn-yellow btn-big" id="winNewBtn" type="button">YENİ TUR</button>
+        <button class="btn btn-ghost" id="winCloseBtn" type="button">TABLOYA DÖN</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+
+  <script src="/names.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

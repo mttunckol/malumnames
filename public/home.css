@@ -1,0 +1,241 @@
+/* ================================================================
+   MALUM MECRA — ana sayfa
+   ================================================================ */
+
+.home {
+  width: min(1600px, 100%);
+  margin: 0 auto;
+  padding: clamp(16px, 2.2vh, 28px) clamp(16px, 2.6vw, 48px) 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vh, 26px);
+}
+
+.home-hero {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2vw, 30px);
+}
+
+.hero-logo {
+  width: clamp(72px, 6.4vw, 116px);
+  aspect-ratio: 1;
+  border-radius: clamp(16px, 1.6vw, 26px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  flex: none;
+}
+
+.home-hero h1 {
+  margin: 6px 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 5.4vw, 104px);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  transform: skewX(-2deg);
+  transform-origin: left bottom;
+}
+.home-hero h1 span {
+  color: var(--yellow);
+  text-shadow: 0 0 40px rgba(238, 197, 106, 0.3);
+}
+
+.home-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(13px, 1vw, 17px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ---------------------------------------------------------------- */
+/* Oyun kartları                                                     */
+/* ---------------------------------------------------------------- */
+
+.game-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(14px, 1.6vw, 24px);
+  flex: 1;
+}
+
+.game-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: clamp(360px, 52vh, 560px);
+  padding: clamp(18px, 2vw, 30px);
+  border-radius: clamp(20px, 1.8vw, 30px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  text-decoration: none;
+  color: var(--ink);
+  overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+  isolation: isolate;
+}
+.game-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(126, 87, 152, 0.4), transparent 60%),
+    radial-gradient(120% 90% at 100% 100%, rgba(192, 144, 36, 0.22), transparent 60%),
+    linear-gradient(165deg, #2a1c38 0%, #1c1229 100%);
+}
+.game-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-linear-gradient(115deg, transparent 0 38px, rgba(255, 255, 255, 0.02) 38px 39px);
+  pointer-events: none;
+}
+.game-tile:hover {
+  transform: translateY(-5px);
+  border-color: rgba(238, 197, 106, 0.45);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.game-tile:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
+
+.tile-no {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  font-family: var(--font-display);
+  font-size: clamp(48px, 4.6vw, 86px);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.tile-art {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: clamp(170px, 24vh, 260px);
+  margin-top: 10px;
+}
+.game-tile.names::before {
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(126, 87, 152, 0.5), transparent 62%),
+    linear-gradient(165deg, #2a1c38 0%, #1c1229 100%);
+}
+.game-tile.fufu::before {
+  background:
+    radial-gradient(120% 100% at 100% 100%, rgba(192, 144, 36, 0.34), transparent 62%),
+    radial-gradient(100% 90% at 0% 0%, rgba(126, 87, 152, 0.34), transparent 60%),
+    linear-gradient(165deg, #2a1c38 0%, #1c1229 100%);
+}
+
+/* Mini kart tahtası */
+.mini-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: min(470px, 86%);
+  transform: rotate(-4deg) skewX(-2deg);
+}
+.mini-card {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.5;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.2vw, 22px);
+  letter-spacing: 0.03em;
+  color: var(--ink);
+}
+.mini-card.p { background: linear-gradient(160deg, #cbb0e8, #7e5798); color: #1c1129; border-color: transparent; }
+.mini-card.y { background: linear-gradient(160deg, #f5dca0, #cfa033); color: #2a1c07; border-color: transparent; }
+.mini-card.n { background: #2b2137; color: #72657f; }
+
+/* Düello görseli */
+.duel {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  transform: rotate(3deg);
+}
+.duel-card {
+  display: grid;
+  place-items: center;
+  width: clamp(112px, 10.4vw, 178px);
+  aspect-ratio: 1;
+  border-radius: 16px;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.7vw, 30px);
+  letter-spacing: 0.04em;
+  border: 2px solid transparent;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+.duel-card.a { background: linear-gradient(160deg, #cbb0e8, #7e5798); color: #1c1129; }
+.duel-card.b { background: linear-gradient(160deg, #f5dca0, #cfa033); color: #2a1c07; }
+.duel-vs {
+  display: grid;
+  place-items: center;
+  width: clamp(46px, 4vw, 64px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #2a1c07;
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.2vw, 20px);
+  box-shadow: 0 0 30px rgba(238, 197, 106, 0.4);
+}
+
+.tile-body h2 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 3.4vw, 62px);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+}
+.tile-body p {
+  margin: 0 0 12px;
+  max-width: 32ch;
+  color: var(--muted);
+  font-size: clamp(12px, 0.92vw, 15px);
+  font-weight: 600;
+  line-height: 1.45;
+}
+.tile-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: clamp(11px, 0.82vw, 13px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.tile-go b { font-size: 1.2em; line-height: 0; }
+.game-tile:hover .tile-go {
+  background: var(--yellow);
+  border-color: transparent;
+  color: #2a1c07;
+}
+
+@media (max-width: 900px) {
+  .home-hero { align-items: flex-start; }
+  .game-select { grid-template-columns: 1fr; }
+  .game-tile { min-height: 340px; }
+  .tile-body h2 { font-size: clamp(34px, 8vw, 52px); }
+}
+
+@media (max-width: 560px) {
+  .home-hero { flex-direction: column; gap: 12px; }
+  .hero-logo { width: 64px; }
+  .home-hero h1 { font-size: clamp(38px, 11vw, 56px); }
+  .tile-art { min-height: 150px; }
+  .duel-card { width: 84px; }
+}

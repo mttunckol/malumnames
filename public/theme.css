@@ -1,0 +1,274 @@
+/* ================================================================
+   MALUM MECRA — ortak tema (ana sayfa + malum fufu)
+   ================================================================ */
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-variable-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-variable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --bg: #150e1f;
+  --bg-2: #1d1429;
+  --panel: #261a34;
+  --panel-2: #32223f;
+  --line: rgba(210, 182, 225, 0.16);
+  --ink: #f8f2fa;
+  --muted: #b3a2c2;
+
+  --purple: #b394d4;
+  --purple-2: #7e5798;
+  --purple-deep: #5c3d72;
+  --yellow: #eec56a;
+  --yellow-2: #cfa033;
+  --neutral: #d3c8dd;
+
+  --shadow-purple: 0 10px 40px rgba(110, 75, 135, 0.4);
+  --shadow-yellow: 0 10px 40px rgba(207, 160, 51, 0.3);
+  --font-display: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+.hidden { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(950px 650px at 10% -12%, rgba(126, 87, 152, 0.34), transparent 62%),
+    radial-gradient(900px 720px at 96% 108%, rgba(192, 144, 36, 0.2), transparent 58%);
+  pointer-events: none;
+  z-index: -2;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, transparent 0 46px, rgba(255, 255, 255, 0.018) 46px 47px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+::selection { background: var(--yellow); color: #1c1129; }
+
+.kicker {
+  display: inline-block;
+  font-size: clamp(9px, 0.62vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  color: var(--yellow);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- */
+/* Üst bar                                                           */
+/* ---------------------------------------------------------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 9px clamp(16px, 2.4vw, 46px);
+  background: rgba(21, 14, 31, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); }
+
+.brand-mark {
+  display: block;
+  width: clamp(42px, 3.1vw, 52px);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.brand-text { display: flex; flex-direction: column; line-height: 1; }
+.brand-text strong {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 1.45vw, 24px);
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+.brand-text small {
+  margin-top: 4px;
+  font-size: clamp(8px, 0.55vw, 10px);
+  font-weight: 800;
+  letter-spacing: 0.42em;
+  color: var(--yellow);
+}
+
+.top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------------------------------------------------------------- */
+/* Butonlar                                                          */
+/* ---------------------------------------------------------------- */
+
+.btn {
+  --btn-bg: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: var(--btn-bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(0.99); }
+.btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-small { padding: 9px 14px; font-size: 10px; letter-spacing: 0.14em; }
+.btn-big { padding: 16px 26px; font-size: clamp(14px, 1vw, 17px); letter-spacing: 0.1em; }
+
+.btn-ghost { background: rgba(255, 255, 255, 0.035); border-color: rgba(255, 255, 255, 0.12); color: var(--ink); }
+.btn-ghost:hover { border-color: rgba(179, 148, 212, 0.55); background: rgba(179, 148, 212, 0.08); }
+
+.btn-purple {
+  background: linear-gradient(180deg, var(--purple) 0%, var(--purple-2) 100%);
+  color: #1b1026;
+  box-shadow: var(--shadow-purple);
+}
+.btn-purple:hover { box-shadow: 0 14px 50px rgba(126, 87, 152, 0.55); }
+
+.btn-yellow {
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--yellow-2) 100%);
+  color: #2a1c07;
+  box-shadow: var(--shadow-yellow);
+}
+.btn-yellow:hover { box-shadow: 0 14px 50px rgba(207, 160, 51, 0.45); }
+
+/* ---------------------------------------------------------------- */
+/* Alt bilgi                                                         */
+/* ---------------------------------------------------------------- */
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 16px 9px;
+  color: rgba(248, 242, 250, 0.3);
+  font-size: clamp(8px, 0.58vw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.foot-logo { width: 15px; height: 15px; border-radius: 4px; opacity: 0.75; }
+.foot-dot { opacity: 0.5; }
+.link-btn {
+  margin-left: 8px;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: rgba(179, 148, 212, 0.55);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--purple); }
+
+/* ---------------------------------------------------------------- */
+/* Bildirim                                                          */
+/* ---------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 90;
+  transform: translateX(-50%);
+  max-width: min(640px, 92vw);
+  padding: 13px 22px;
+  border-radius: 12px;
+  background: var(--yellow);
+  color: #2a1c07;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  animation: toast-in 0.25s ease both;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 860px) {
+  .topbar { flex-wrap: wrap; justify-content: center; row-gap: 10px; }
+  .brand { order: 1; }
+  .top-actions { order: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
