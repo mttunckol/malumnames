@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Malum Fufu — Eleme Yarışması</title>
-  <meta name="description" content="Malum Fufu: fotoğraflı eleme yarışması. Eşleşmeleri kur, kazananları seç, finalde tek isim kalsın.">
+  <meta name="description" content="Malum Fufu: fotoğraflı eleme yarışması. 8, 16 veya 32 kişi seç, eşleşmeleri kur, kazananı belirle.">
   <meta name="theme-color" content="#150e1f">
   <meta property="og:title" content="Malum Fufu — Eleme Yarışması">
   <meta property="og:description" content="Fotoğraflar karşı karşıya. Kazanan bir üst tura.">
@@ -38,18 +38,27 @@
           <span class="kicker">FOTOĞRAFLI ELEME YARIŞMASI</span>
           <h1>YARIŞMAYI <span>KUR</span></h1>
         </div>
-        <p>Katılımcıları ekle, fotoğraflarını yükle ve 1. tur eşleşmelerini belirle. Her turda kazanan bir üst tura çıkar; finalde tek isim kalır.</p>
+        <p>Katılımcı sayısını seç, isimleri ve fotoğrafları ekle. Eşleşmeler sırayla ekrana gelecek; her turda kazanan bir üst tura çıkacak.</p>
+      </div>
+
+      <div class="count-bar">
+        <span class="count-title">KATILIMCI SAYISI</span>
+        <div class="count-options" role="group" aria-label="Katılımcı sayısı">
+          <button class="count-btn active" type="button" data-count="8"><b>8</b><span>4 eşleşme</span></button>
+          <button class="count-btn" type="button" data-count="16"><b>16</b><span>8 eşleşme</span></button>
+          <button class="count-btn" type="button" data-count="32"><b>32</b><span>16 eşleşme</span></button>
+        </div>
       </div>
 
       <div class="setup-layout">
         <div class="panel participants-panel">
           <div class="panel-head">
             <h2>KATILIMCILAR</h2>
-            <span class="count-badge" id="countBadge">0 katılımcı</span>
+            <span class="count-badge" id="countBadge">8 KATILIMCI</span>
           </div>
+          <p class="panel-hint">İsmi, fotoğrafın altındaki kutuya yaz. Fotoğraf için büyük kareye tıkla.</p>
           <div class="participant-grid" id="participantGrid"></div>
           <div class="panel-actions">
-            <button class="btn btn-ghost" id="addBtn" type="button">+ KATILIMCI EKLE</button>
             <button class="btn btn-ghost" id="shuffleBtn" type="button">KARIŞTIR</button>
             <button class="btn btn-ghost" id="clearBtn" type="button">TEMİZLE</button>
           </div>
@@ -64,7 +73,7 @@
           <button class="btn btn-yellow btn-big start-btn" id="startBtn" type="button">
             YARIŞMAYI BAŞLAT <span>→</span>
           </button>
-          <p class="pairs-note">4, 8, 16 veya 32 katılımcı olmalı. İsimler zorunlu, fotoğraflar opsiyonel.</p>
+          <p class="pairs-note">İsimler zorunlu, fotoğraflar opsiyonel. Eşleşmeleri açılır listelerden değiştirebilirsin.</p>
           <div class="flow" id="flowHint">—</div>
         </aside>
       </div>
@@ -77,16 +86,15 @@
           <span class="kicker">TUR</span>
           <h1 id="roundLabel">ÇEYREK FİNAL</h1>
         </div>
-        <div class="round-progress">
+        <div class="match-progress">
+          <span class="match-text" id="matchProgress">EŞLEŞME 1 / 4</span>
           <div class="progress-track"><span id="progressFill"></span></div>
-          <span class="progress-text" id="progressText">0/4</span>
         </div>
         <div class="round-actions">
-          <button class="btn btn-ghost btn-small" id="undoBtn" type="button">↶ GERİ AL</button>
           <button class="btn btn-ghost btn-small" id="quitBtn" type="button">YARIŞMAYI BIRAK</button>
         </div>
       </div>
-      <div class="matches" id="matches"></div>
+      <div class="arena" id="arena"></div>
     </section>
   </main>
 
@@ -94,8 +102,19 @@
     <img class="foot-logo" src="/logo-tile.png" alt="">
     <span>MALUM FUFU</span>
     <span class="foot-dot">•</span>
-    <span>HER TURDA BİR İSİM ELENİR</span>
+    <span>HER EŞLEŞMEDE BİR İSİM ELENİR</span>
   </footer>
+
+  <!-- TUR SONU / FİNAL GİRİŞİ -->
+  <div class="interlude hidden" id="interlude" role="dialog" aria-modal="true" aria-labelledby="interTitle">
+    <div class="inter-content">
+      <span class="kicker" id="interKicker">TUR TAMAMLANDI</span>
+      <h2 id="interTitle">YARI FİNAL</h2>
+      <p class="inter-text" id="interText">2 eşleşme</p>
+      <div class="inter-names" id="interNames"></div>
+      <button class="btn btn-yellow btn-big" id="continueBtn" type="button">DEVAM <span>→</span></button>
+    </div>
+  </div>
 
   <!-- KAZANAN -->
   <div class="win hidden" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
@@ -111,7 +130,7 @@
       </div>
       <div class="win-actions">
         <button class="btn btn-yellow btn-big" id="againBtn" type="button">YENİ YARIŞMA</button>
-        <button class="btn btn-ghost" id="closeWinBtn" type="button">FİNALİ GÖR</button>
+        <button class="btn btn-ghost" id="closeWinBtn" type="button">KAPAT</button>
       </div>
     </div>
   </div>

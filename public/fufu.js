@@ -2,12 +2,12 @@
 
 /* ================================================================
    MALUM FUFU — fotoğraflı eleme yarışması
-   Tek ekranda, tarayıcıda çalışır; veriler localStorage'da saklanır.
+   8 / 16 / 32 kişi · eşleşmeler tek tek · turlar arası "Devam"
    ================================================================ */
 
 const STORAGE_KEY = 'malumfufu.v1';
-const ALLOWED_COUNTS = [4, 8, 16, 32];
-const MAX_PARTICIPANTS = 32;
+const ALLOWED_COUNTS = [8, 16, 32];
+const DEFAULT_COUNT = 8;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -18,16 +18,21 @@ const els = {
   countBadge: $('#countBadge'),
   pairs: $('#pairsList'),
   pairHint: $('#pairHint'),
-  addBtn: $('#addBtn'),
   shuffleBtn: $('#shuffleBtn'),
   clearBtn: $('#clearBtn'),
   startBtn: $('#startBtn'),
+  flowHint: $('#flowHint'),
   roundLabel: $('#roundLabel'),
+  matchProgress: $('#matchProgress'),
   progressFill: $('#progressFill'),
-  progressText: $('#progressText'),
-  matches: $('#matches'),
-  undoBtn: $('#undoBtn'),
+  arena: $('#arena'),
   quitBtn: $('#quitBtn'),
+  interlude: $('#interlude'),
+  interKicker: $('#interKicker'),
+  interTitle: $('#interTitle'),
+  interText: $('#interText'),
+  interNames: $('#interNames'),
+  continueBtn: $('#continueBtn'),
   win: $('#winOverlay'),
   winnerPhoto: $('#winnerPhoto'),
   winnerName: $('#winnerName'),
@@ -36,6 +41,7 @@ const els = {
 };
 
 let state = {
+  count: DEFAULT_COUNT,
   participants: [],
   pairs: [],
   tournament: null,
@@ -44,7 +50,6 @@ let state = {
 
 let saveTimer = null;
 let advanceTimer = null;
-let undoStack = [];
 let toastTimer = null;
 
 /* ---------------------------------------------------------------- */
@@ -86,6 +91,14 @@ function participantById(id) {
   return state.participants.find((p) => p.id === id) || null;
 }
 
+function newParticipant(name = '') {
+  return { id: uid(), name, img: null };
+}
+
+function defaultParticipants(count = DEFAULT_COUNT) {
+  return Array.from({ length: count }, () => newParticipant());
+}
+
 /* ---------------------------------------------------------------- */
 /* Kalıcılık                                                         */
 /* ---------------------------------------------------------------- */
@@ -94,6 +107,7 @@ function saveNow() {
   if (state.demo) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      count: state.count,
       participants: state.participants,
       pairs: state.pairs,
       tournament: state.tournament
@@ -108,21 +122,44 @@ function saveSoon() {
   saveTimer = setTimeout(saveNow, 250);
 }
 
+function normalizeCount(value) {
+  const n = Number(value);
+  return ALLOWED_COUNTS.includes(n) ? n : DEFAULT_COUNT;
+}
+
+function resizeParticipants() {
+  const list = state.participants.slice(0, state.count);
+  while (list.length < state.count) list.push(newParticipant());
+  state.participants = list;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (!Array.isArray(data.participants)) return false;
-    state.participants = data.participants.map((p) => ({
-      id: p.id || uid(),
-      name: String(p.name || ''),
-      img: typeof p.img === 'string' ? p.img : null
-    }));
+
+    if (Array.isArray(data.participants) && data.participants.length) {
+      state.participants = data.participants.map((p) => ({
+        id: p.id || uid(),
+        name: String(p.name || ''),
+        img: typeof p.img === 'string' ? p.img : null
+      }));
+    }
+
+    state.count = normalizeCount(data.count || state.participants.length);
+    resizeParticipants();
+
     state.pairs = Array.isArray(data.pairs) ? data.pairs : [];
-    state.tournament = data.tournament || null;
-    if (!state.participants.length) return false;
-    if (state.pairs.length !== Math.ceil(state.participants.length / 2)) autoPair();
+    if (state.pairs.length !== state.count / 2) autoPair();
+
+    const t = data.tournament;
+    const validTournament = t
+      && typeof t.roundIndex === 'number'
+      && typeof t.matchIndex === 'number'
+      && typeof t.stage === 'string'
+      && Array.isArray(t.rounds);
+    state.tournament = validTournament ? t : null;
     return true;
   } catch {
     return false;
@@ -130,7 +167,7 @@ function load() {
 }
 
 /* ---------------------------------------------------------------- */
-/* Fotoğraf işleme                                                    */
+/* Fotoğraf                                                          */
 /* ---------------------------------------------------------------- */
 
 function loadImage(src) {
@@ -173,16 +210,8 @@ async function photoFromFile(file) {
 }
 
 /* ---------------------------------------------------------------- */
-/* Kurulum ekranı                                                    */
+/* Kurulum                                                           */
 /* ---------------------------------------------------------------- */
-
-function newParticipant(name = '') {
-  return { id: uid(), name, img: null };
-}
-
-function defaultParticipants() {
-  return Array.from({ length: 8 }, () => newParticipant());
-}
 
 function autoPair() {
   const ids = state.participants.map((p) => p.id);
@@ -193,8 +222,27 @@ function autoPair() {
   state.pairs = pairs;
 }
 
+function setCount(count) {
+  if (!ALLOWED_COUNTS.includes(count) || count === state.count) return;
+
+  if (count < state.count) {
+    const removed = state.participants.slice(count);
+    const hasData = removed.some((p) => p.name.trim() || p.img);
+    if (hasData && !confirm(`Katılımcı sayısı ${count} olarak değişsin mi? Fazla isim ve fotoğraflar silinecek.`)) {
+      return;
+    }
+  }
+
+  state.count = count;
+  resizeParticipants();
+  autoPair();
+  renderSetup();
+  saveNow();
+}
+
 function renderParticipants() {
   els.grid.innerHTML = '';
+  els.grid.className = `participant-grid count-${state.count}`;
   const frag = document.createDocumentFragment();
 
   state.participants.forEach((p, i) => {
@@ -237,18 +285,12 @@ function renderParticipants() {
     nameInput.className = 'p-name';
     nameInput.type = 'text';
     nameInput.maxLength = 24;
-    nameInput.placeholder = 'İSİM';
+    nameInput.placeholder = 'İSİM YAZ';
     nameInput.value = p.name;
     nameInput.autocomplete = 'off';
     nameInput.spellcheck = false;
 
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'p-remove';
-    remove.title = 'Kaldır';
-    remove.textContent = '✕';
-
-    card.append(order, photoLabel, nameInput, remove);
+    card.append(order, photoLabel, nameInput);
 
     nameInput.addEventListener('input', () => {
       p.name = nameInput.value;
@@ -275,13 +317,6 @@ function renderParticipants() {
       }
     });
 
-    remove.addEventListener('click', () => {
-      state.participants = state.participants.filter((x) => x.id !== p.id);
-      autoPair();
-      renderSetup();
-      saveNow();
-    });
-
     frag.appendChild(card);
   });
 
@@ -294,15 +329,6 @@ function participantLabel(p, index) {
 
 function renderPairs() {
   els.pairs.innerHTML = '';
-
-  if (state.participants.length < 2) {
-    const empty = document.createElement('p');
-    empty.className = 'pairs-note';
-    empty.textContent = 'Eşleşme için en az 2 katılımcı ekleyin.';
-    els.pairs.appendChild(empty);
-    els.pairHint.textContent = '—';
-    return;
-  }
 
   state.pairs.forEach((pair, i) => {
     const row = document.createElement('div');
@@ -330,6 +356,7 @@ function renderPairs() {
       const side = el.dataset.side === 'a' ? 0 : 1;
       state.pairs[pairIndex][side] = el.value || null;
       validatePairUI();
+      updateFlowHint();
       saveSoon();
     };
 
@@ -383,36 +410,56 @@ function validatePairUI() {
     if (duplicate) problem = true;
   });
 
-  els.pairHint.textContent = problem
-    ? 'TEKRAR VAR'
-    : `${state.pairs.length} EŞLEŞME`;
+  els.pairHint.textContent = problem ? 'TEKRAR VAR' : `${state.pairs.length} EŞLEŞME`;
+}
+
+function roundName(matchCount) {
+  if (matchCount === 1) return 'FİNAL';
+  if (matchCount === 2) return 'YARI FİNAL';
+  if (matchCount === 4) return 'ÇEYREK FİNAL';
+  if (matchCount === 8) return 'SON 16';
+  if (matchCount === 16) return 'SON 32';
+  return `${matchCount * 2}'Lİ TUR`;
+}
+
+function roundFlow(count) {
+  const names = [];
+  let matches = count / 2;
+  while (matches >= 1) {
+    names.push(roundName(matches));
+    matches /= 2;
+  }
+  return names.join('  →  ');
+}
+
+function updateFlowHint() {
+  if (!els.flowHint) return;
+  els.flowHint.textContent = roundFlow(state.count);
 }
 
 function renderSetup() {
+  document.querySelectorAll('.count-btn').forEach((btn) => {
+    btn.classList.toggle('active', Number(btn.dataset.count) === state.count);
+  });
+
   renderParticipants();
   renderPairs();
+  updateFlowHint();
 
-  const count = state.participants.length;
-  els.countBadge.textContent = `${count} KATILIMCI`;
-  els.countBadge.classList.toggle('ok', ALLOWED_COUNTS.includes(count));
-
-  const flow = $('#flowHint');
-  if (flow) {
-    flow.textContent = ALLOWED_COUNTS.includes(count)
-      ? roundFlow(count)
-      : '4 · 8 · 16 · 32 KATILIMCI';
-  }
+  els.countBadge.textContent = `${state.count} KATILIMCI`;
+  els.countBadge.classList.add('ok');
 }
 
 /* ---------------------------------------------------------------- */
-/* Yarışma                                                           */
+/* Oyun                                                              */
 /* ---------------------------------------------------------------- */
 
 function validateStart() {
-  const count = state.participants.length;
-
-  if (!ALLOWED_COUNTS.includes(count)) {
-    return `Katılımcı sayısı 4, 8, 16 veya 32 olmalı (şu an ${count}).`;
+  if (!ALLOWED_COUNTS.includes(state.count)) {
+    return 'Katılımcı sayısı 8, 16 veya 32 olmalı.';
+  }
+  if (state.participants.length !== state.count) {
+    return `Tam ${state.count} katılımcı olmalı.`;
   }
 
   const empty = state.participants.find((p) => !p.name.trim());
@@ -426,7 +473,7 @@ function validateStart() {
       used.add(id);
     }
   }
-  if (used.size !== count) return 'Her katılımcı tam olarak bir kez eşleşmeli.';
+  if (used.size !== state.count) return 'Her katılımcı tam olarak bir kez eşleşmeli.';
 
   return null;
 }
@@ -454,26 +501,22 @@ function buildTournament() {
     roundNo += 1;
   }
 
-  return { rounds, roundIndex: 0, finished: false, winner: null, advancing: false };
+  return {
+    rounds,
+    roundIndex: 0,
+    matchIndex: 0,
+    stage: 'match',
+    finished: false,
+    winner: null
+  };
 }
 
-function roundFlow(count) {
-  const names = [];
-  let matches = count / 2;
-  while (matches >= 1) {
-    names.push(roundName(matches));
-    matches /= 2;
-  }
-  return names.join('  →  ');
+function currentRound() {
+  return state.tournament.rounds[state.tournament.roundIndex];
 }
 
-function roundName(matchCount) {
-  if (matchCount === 1) return 'FİNAL';
-  if (matchCount === 2) return 'YARI FİNAL';
-  if (matchCount === 4) return 'ÇEYREK FİNAL';
-  if (matchCount === 8) return 'SON 16';
-  if (matchCount === 16) return 'SON 32';
-  return `${matchCount * 2}'Lİ TUR`;
+function currentMatch() {
+  return currentRound()[state.tournament.matchIndex];
 }
 
 function startTournament(silent) {
@@ -484,7 +527,7 @@ function startTournament(silent) {
   }
 
   state.tournament = buildTournament();
-  undoStack = [];
+  clearTimeout(advanceTimer);
   showGame();
   saveNow();
   return true;
@@ -493,6 +536,7 @@ function startTournament(silent) {
 function showSetup() {
   els.setup.classList.remove('hidden');
   els.game.classList.add('hidden');
+  els.interlude.classList.add('hidden');
   els.win.classList.add('hidden');
   renderSetup();
 }
@@ -500,46 +544,35 @@ function showSetup() {
 function showGame() {
   els.setup.classList.add('hidden');
   els.game.classList.remove('hidden');
+  els.interlude.classList.add('hidden');
   els.win.classList.add('hidden');
-  renderRound();
+  renderMatch();
 }
 
-function renderRound() {
+function renderMatch() {
   const t = state.tournament;
   if (!t) return;
 
-  const round = t.rounds[t.roundIndex];
+  const round = currentRound();
+  const match = currentMatch();
   const decided = round.filter((m) => m.winner).length;
 
   els.roundLabel.textContent = roundName(round.length);
+  els.matchProgress.textContent = `EŞLEŞME ${t.matchIndex + 1} / ${round.length}`;
   els.progressFill.style.width = `${(decided / round.length) * 100}%`;
-  els.progressText.textContent = `${decided}/${round.length}`;
-  els.undoBtn.disabled = undoStack.length === 0;
 
-  els.matches.className = `matches${round.length === 1 ? ' final' : ''}${round.length >= 8 ? ' dense' : ''}`;
-  els.matches.innerHTML = '';
+  els.arena.innerHTML = '';
 
-  const frag = document.createDocumentFragment();
-  round.forEach((match, index) => {
-    frag.appendChild(buildMatch(match, index));
-  });
-  els.matches.appendChild(frag);
-}
-
-function buildMatch(match, index) {
   const wrap = document.createElement('div');
-  wrap.className = `match${match.winner ? ' done' : ''}`;
-
-  const a = participantById(match.a);
-  const b = participantById(match.b);
+  wrap.className = 'arena-match';
 
   wrap.append(
-    buildFighter(a, match, index, 'a'),
+    buildFighter(participantById(match.a), match, 'a'),
     buildVs(),
-    buildFighter(b, match, index, 'b')
+    buildFighter(participantById(match.b), match, 'b')
   );
 
-  return wrap;
+  els.arena.appendChild(wrap);
 }
 
 function buildVs() {
@@ -549,7 +582,7 @@ function buildVs() {
   return vs;
 }
 
-function buildFighter(participant, match, index, side) {
+function buildFighter(participant, match, side) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'fighter';
@@ -564,7 +597,7 @@ function buildFighter(participant, match, index, side) {
     btn.classList.add(match.winner === participant.id ? 'win' : 'lose');
     btn.disabled = true;
   } else {
-    btn.addEventListener('click', () => pick(index, participant.id));
+    btn.addEventListener('click', () => pick(participant.id));
   }
 
   const photo = document.createElement('span');
@@ -590,83 +623,145 @@ function buildFighter(participant, match, index, side) {
   return btn;
 }
 
-function pick(matchIndex, participantId) {
+function pick(participantId) {
   const t = state.tournament;
-  if (!t || t.advancing || t.finished) return;
+  if (!t || t.stage !== 'match' || t.finished) return;
 
-  const round = t.rounds[t.roundIndex];
-  const match = round[matchIndex];
+  const match = currentMatch();
   if (!match || match.winner) return;
 
   match.winner = participantId;
-  undoStack.push({ roundIndex: t.roundIndex, matchIndex, prevWinner: null });
+  t.stage = 'resolving';
 
-  renderRound();
+  renderMatch();
   saveNow();
 
-  if (round.every((m) => m.winner)) {
-    t.advancing = true;
-    clearTimeout(advanceTimer);
-    advanceTimer = setTimeout(advance, 1400);
-  }
+  clearTimeout(advanceTimer);
+  advanceTimer = setTimeout(advanceAfterPick, 1000);
 }
 
-function undo() {
+function advanceAfterPick() {
   const t = state.tournament;
   if (!t) return;
 
-  clearTimeout(advanceTimer);
-  advanceTimer = null;
+  const round = currentRound();
+  t.stage = 'match';
 
-  const last = undoStack.pop();
-  if (!last || last.roundIndex !== t.roundIndex) {
-    undoStack = [];
-    renderRound();
+  if (t.matchIndex < round.length - 1) {
+    t.matchIndex += 1;
+    renderMatch();
+    saveNow();
     return;
   }
 
-  const match = t.rounds[t.roundIndex][last.matchIndex];
-  match.winner = last.prevWinner;
-  t.advancing = false;
-  renderRound();
-  saveNow();
+  endRound();
 }
 
-function advance() {
+function endRound() {
   const t = state.tournament;
-  if (!t) return;
-
-  const round = t.rounds[t.roundIndex];
+  const round = currentRound();
+  const winners = round.map((m) => m.winner);
 
   if (t.roundIndex === t.rounds.length - 1) {
     finish(round[0].winner);
     return;
   }
 
-  const winners = round.map((m) => m.winner);
   const next = t.rounds[t.roundIndex + 1];
-
   next.forEach((match, i) => {
     match.a = winners[i * 2];
     match.b = winners[i * 2 + 1];
     match.winner = null;
   });
 
-  t.roundIndex += 1;
-  t.advancing = false;
-  undoStack = [];
-  renderRound();
+  t.stage = 'interlude';
+  showInterlude(next);
   saveNow();
-  toast(`${roundName(next.length)} başlıyor.`);
+}
+
+function showInterlude(nextRound) {
+  const isFinal = nextRound.length === 1;
+
+  els.interKicker.textContent = isFinal ? 'SON 2 KALDI' : 'TUR TAMAMLANDI';
+  els.interTitle.textContent = roundName(nextRound.length);
+  els.interText.textContent = isFinal
+    ? 'Kazanan tek isim olacak.'
+    : `${nextRound.length} eşleşme`;
+
+  els.interNames.innerHTML = '';
+  nextRound.forEach((match) => {
+    const a = participantById(match.a);
+    const b = participantById(match.b);
+    if (!a || !b) return;
+
+    const row = document.createElement('span');
+    row.className = 'inter-pair';
+    row.textContent = `${upper(a.name)}  vs  ${upper(b.name)}`;
+    els.interNames.appendChild(row);
+  });
+
+  els.interlude.classList.remove('hidden');
+}
+
+function continueRound() {
+  const t = state.tournament;
+  if (!t || t.stage !== 'interlude') return;
+
+  els.interlude.classList.add('hidden');
+  t.roundIndex += 1;
+  t.matchIndex = 0;
+  t.stage = 'match';
+  clearTimeout(advanceTimer);
+
+  renderMatch();
+  saveNow();
 }
 
 function finish(winnerId) {
   const t = state.tournament;
   t.finished = true;
   t.winner = winnerId;
-  t.advancing = false;
+  t.stage = 'champion';
+  clearTimeout(advanceTimer);
+
+  renderChampion();
   saveNow();
   showWin(winnerId);
+}
+
+function renderChampion() {
+  const t = state.tournament;
+  const p = participantById(t.winner);
+  els.arena.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'champion';
+
+  const kicker = document.createElement('span');
+  kicker.className = 'kicker';
+  kicker.textContent = 'ŞAMPİYON';
+
+  const photo = document.createElement('div');
+  photo.className = 'champion-photo';
+
+  if (p && p.img) {
+    const img = document.createElement('img');
+    img.src = p.img;
+    img.alt = p.name;
+    photo.appendChild(img);
+  } else {
+    const ph = document.createElement('span');
+    ph.className = 'initials';
+    ph.textContent = p ? initials(p.name) : '?';
+    photo.appendChild(ph);
+  }
+
+  const name = document.createElement('div');
+  name.className = 'champion-name';
+  name.textContent = p ? upper(p.name) : '—';
+
+  wrap.append(kicker, photo, name);
+  els.arena.appendChild(wrap);
 }
 
 /* ---------------------------------------------------------------- */
@@ -692,6 +787,7 @@ function makeConfetti() {
 function showWin(winnerId) {
   const p = participantById(winnerId);
   els.winnerPhoto.innerHTML = '';
+
   if (p) {
     if (p.img) {
       const img = document.createElement('img');
@@ -715,7 +811,7 @@ function showWin(winnerId) {
 }
 
 /* ---------------------------------------------------------------- */
-/* Demo (ekran görüntüsü / hızlı test)                               */
+/* Demo                                                              */
 /* ---------------------------------------------------------------- */
 
 function demoAvatar(name, index) {
@@ -747,46 +843,76 @@ function demoAvatar(name, index) {
   return canvas.toDataURL('image/jpeg', 0.8);
 }
 
-function demoSetup() {
-  const names = ['Ali', 'Veli', 'Ayşe', 'Zeynep', 'Tunç', 'Taygun', 'Gökçe', 'Melisa'];
+function demoSetup(count = 8) {
+  const base = ['Ali', 'Veli', 'Ayşe', 'Zeynep', 'Tunç', 'Taygun', 'Gökçe', 'Melisa'];
+  const names = count === 8
+    ? base
+    : Array.from({ length: count }, (_, i) => `Oyuncu ${String(i + 1).padStart(2, '0')}`);
   state.demo = true;
+  state.count = count;
   state.participants = names.map((name, i) => ({
     id: `demo-${i}`,
     name,
     img: demoAvatar(name, i)
   }));
+  state.pairs = [];
   state.tournament = null;
   autoPair();
 }
 
-function demoPlayRound(winners) {
-  winners.forEach((id, i) => pick(i, id));
-  clearTimeout(advanceTimer);
-  advanceTimer = null;
-  const round = state.tournament.rounds[state.tournament.roundIndex];
-  if (round.every((m) => m.winner)) advance();
+function demoCompleteRound(winners) {
+  winners.forEach((id) => {
+    if (state.tournament.stage !== 'match') return;
+    currentMatch().winner = id;
+    advanceAfterPick();
+  });
 }
 
 function runDemo(mode) {
-  demoSetup();
+  const demoCount = mode === 'setup16' ? 16 : mode === 'setup32' ? 32 : 8;
+  demoSetup(demoCount);
 
-  if (mode === 'setup') {
+  if (mode === 'setup' || mode === 'setup16' || mode === 'setup32') {
     showSetup();
     return;
   }
 
   startTournament(true);
 
-  if (mode === 'round2') {
-    demoPlayRound(['demo-0', 'demo-2', 'demo-4', 'demo-6']);
-  } else if (mode === 'final') {
-    demoPlayRound(['demo-0', 'demo-2', 'demo-4', 'demo-6']);
-    demoPlayRound(['demo-0', 'demo-6']);
-  } else if (mode === 'win') {
-    demoPlayRound(['demo-0', 'demo-2', 'demo-4', 'demo-6']);
-    demoPlayRound(['demo-0', 'demo-6']);
-    demoPlayRound(['demo-6']);
+  if (mode === 'auto') {
+    const timer = setInterval(() => {
+      if (!els.win.classList.contains('hidden')) {
+        clearInterval(timer);
+        return;
+      }
+      if (!els.interlude.classList.contains('hidden')) {
+        els.continueBtn.click();
+        return;
+      }
+      const active = els.arena.querySelector('.fighter:not(:disabled)');
+      if (active) active.click();
+    }, 1200);
+    return;
   }
+
+  if (mode === 'match') return;
+
+  demoCompleteRound(['demo-0', 'demo-3', 'demo-4', 'demo-7']);
+
+  if (mode === 'interlude') return;
+
+  continueRound();
+  if (mode === 'match2') return;
+
+  demoCompleteRound(['demo-0', 'demo-7']);
+
+  if (mode === 'finalIntro') return;
+
+  continueRound();
+
+  if (mode === 'final') return;
+
+  demoCompleteRound(['demo-0']);
 }
 
 /* ---------------------------------------------------------------- */
@@ -794,15 +920,8 @@ function runDemo(mode) {
 /* ---------------------------------------------------------------- */
 
 function bind() {
-  els.addBtn.addEventListener('click', () => {
-    if (state.participants.length >= MAX_PARTICIPANTS) {
-      toast(`En fazla ${MAX_PARTICIPANTS} katılımcı eklenebilir.`);
-      return;
-    }
-    state.participants.push(newParticipant());
-    autoPair();
-    renderSetup();
-    saveNow();
+  document.querySelectorAll('.count-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setCount(Number(btn.dataset.count)));
   });
 
   els.shuffleBtn.addEventListener('click', () => {
@@ -814,30 +933,26 @@ function bind() {
   });
 
   els.clearBtn.addEventListener('click', () => {
-    if (!confirm('Tüm katılımcılar ve fotoğraflar silinsin mi?')) return;
-    state.participants = defaultParticipants();
+    if (!confirm('Tüm isimler ve fotoğraflar silinsin mi?')) return;
+    state.participants = defaultParticipants(state.count);
     state.tournament = null;
-    undoStack = [];
     autoPair();
     renderSetup();
     saveNow();
   });
 
   els.startBtn.addEventListener('click', () => startTournament(false));
-
-  els.undoBtn.addEventListener('click', undo);
+  els.continueBtn.addEventListener('click', continueRound);
 
   els.quitBtn.addEventListener('click', () => {
-    if (!confirm('Yarışmadan çıkılsın mı? Eşleşmeler ve fotoğraflar korunur.')) return;
+    if (!confirm('Yarışmadan çıkılsın mı? İsimler, fotoğraflar ve eşleşmeler korunur.')) return;
     state.tournament = null;
-    undoStack = [];
     showSetup();
     saveNow();
   });
 
   $('#againBtn').addEventListener('click', () => {
     state.tournament = null;
-    undoStack = [];
     showSetup();
     saveNow();
   });
@@ -869,21 +984,41 @@ function boot() {
   const loaded = load();
 
   if (!loaded || !state.participants.length) {
-    state.participants = defaultParticipants();
+    state.count = DEFAULT_COUNT;
+    state.participants = defaultParticipants(state.count);
     autoPair();
     saveNow();
   }
 
-  if (state.tournament && state.tournament.finished) {
-    state.tournament = null;
-    saveNow();
+  if (state.tournament) {
+    if (state.tournament.finished) {
+      state.tournament = null;
+      saveNow();
+      showSetup();
+      return;
+    }
+
+    if (state.tournament.stage === 'resolving') {
+      state.tournament.stage = 'match';
+      showGame();
+      if (currentMatch().winner) {
+        advanceTimer = setTimeout(advanceAfterPick, 400);
+      }
+      return;
+    }
+
+    if (state.tournament.stage === 'interlude') {
+      showGame();
+      renderMatch();
+      showInterlude(state.tournament.rounds[state.tournament.roundIndex + 1]);
+      return;
+    }
+
+    showGame();
+    return;
   }
 
-  if (state.tournament) {
-    showGame();
-  } else {
-    showSetup();
-  }
+  showSetup();
 }
 
 boot();
